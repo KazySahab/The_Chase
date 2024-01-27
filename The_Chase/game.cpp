@@ -6,32 +6,43 @@ const float w_height = sf::VideoMode::getDesktopMode().height;
 
 Game::Game()
 	:window(sf::VideoMode(w_width, w_height), "Don't Touch")
-
 {
 	if (!font.loadFromFile("font/roboto.ttf"))
 	{
 		throw std::runtime_error("Failed to load font.");
 	}
+	if (!background_image.loadFromFile("images/background_image.jpg"))
+	{
+		std::cout << "background Load failed";
+	}
 
 	score_text.setFont(font);
 	score_text.setCharacterSize(24);
-	score_text.setFillColor(sf::Color::White);
+	score_text.setStyle(sf::Text::Bold);
+	score_text.setFillColor(sf::Color::Black);
 	score_text.setPosition(sf::Vector2f{ 50,10 });
 
 	bullet_num.setFont(font);
 	bullet_num.setCharacterSize(24);
-	bullet_num.setFillColor(sf::Color::White);
+	bullet_num.setStyle(sf::Text::Bold);
+	bullet_num.setFillColor(sf::Color::Black);
 	bullet_num.setPosition(sf::Vector2f{ w_width - 300,10 });
 
 	bullet_reload_time.setFont(font);
 	bullet_reload_time.setCharacterSize(24);
-	bullet_reload_time.setFillColor(sf::Color::White);
+	bullet_reload_time.setStyle(sf::Text::Bold);
+	bullet_reload_time.setFillColor(sf::Color::Black);
 	bullet_reload_time.setPosition(sf::Vector2f{ w_width - 300,50 });
 
 	help_text.setFont(font);
 	help_text.setCharacterSize(24);
-	help_text.setFillColor(sf::Color::White);
+	help_text.setStyle(sf::Text::Bold);
+	help_text.setFillColor(sf::Color::Black);
 	help_text.setPosition(sf::Vector2f{ w_width / 2 - 120,10 });
+
+
+	background.setSize(sf::Vector2f(w_width, w_height));
+	background.setTexture(&background_image);
 }
 
 
@@ -58,7 +69,7 @@ void Game::run()
 				bullet_time.restart();
 			}
 			help_text.setString("Press 'ESC' to exit or Hold 'P' to pause");
-			score_text.setString("Score : " + std::to_string(score));
+			score_text.setString("Score : " + std::to_string(score) + "\n Life :" + std::to_string(3 - p_e_collision_count));
 			bullet_reload_time.setString("Reload Time (30s) : " + std::to_string((int)bullet_time.getElapsedTime().asSeconds()));
 			bullet_num.setString("Remaining Bullets : " + std::to_string(bullet_no));
 			if (!is_game_paused)
@@ -222,6 +233,7 @@ void Game::move_entity()
 void Game::render()
 {
 	window.clear();
+	window.draw(background);
 	window.draw(player->shape->circle);
 	for (auto& e : m_entities.get_entities("enemies"))
 	{
@@ -241,19 +253,17 @@ void Game::render()
 void Game::spawn_enemy()
 {
 	float e_radius = get_random(10, 20);
-	float e_segment = get_random(3, 7);
-	float e_thickness = 3;
+	float e_thickness = 5;
 	Vec2 e_pos = { get_random(50, w_width - 50), get_random(50, w_height - 50) };
-	Vec2 e_velocity = { get_random(200,250),get_random(200,250) };
+	Vec2 e_velocity = { get_random(150,200),get_random(150,200) };
 	float angle = 200;
 
-	sf::Color e_fill_color = { sf::Uint8(get_random(0, 255)),
-						  sf::Uint8(get_random(0, 255)),
-						  sf::Uint8(get_random(0, 255)) };
+	sf::Color e_fill_color = sf::Color::Transparent;
 
 	auto enemy = m_entities.add_entity("enemies");
 	enemy->transform = std::make_shared<Ctransform>(e_pos, e_velocity, angle);
-	enemy->shape = std::make_shared<Cshape>(e_radius, e_segment, e_fill_color, sf::Color::Red, e_thickness);
+	enemy->shape = std::make_shared<Cshape>(e_radius, 30, sf::Color::Black, e_thickness);
+	enemy->shape->load_character(get_enemy_image());
 	enemy->collision_radius = std::make_shared<Ccollision>(e_radius + e_thickness);
 	enemy->transform->velocity *= delta_time;
 	score += 5;
@@ -266,10 +276,10 @@ void Game::spawn_bullet(std::shared_ptr<Entity>player, const Vec2& target)
 		float b_radius = 5.0f;
 		auto bullet = m_entities.add_entity("bullets");
 		bullet->transform = std::make_shared<Ctransform>(player->transform->pos, Vec2(300, 300), 0.0f);
-		bullet->shape = std::make_shared<Cshape>(b_radius, 30.0f, sf::Color::White, sf::Color::Red, 0.0f);
+		bullet->shape = std::make_shared<Cshape>(b_radius, 30.0f, sf::Color::Red, 0.0f);
 		bullet->collision_radius = std::make_shared<Ccollision>(b_radius);
 		bullet->life = std::make_shared<Clife>(10000, m_current_frame);
-
+		bullet->shape->load_character("bullet");
 		Vec2 direction;
 		direction.x = target.x - player->transform->pos.x;
 		direction.y = target.y - player->transform->pos.y;
@@ -291,16 +301,17 @@ void Game::spawn_bullet(std::shared_ptr<Entity>player, const Vec2& target)
 
 void Game::spawn_player()
 {
-	float p_radius = 20;
-	float p_segment = 7;
-	float p_thickness = 4;
+	float p_radius = 25;
+	float p_segment = 30;
+	float p_thickness = 2;
 	Vec2 p_pos = { w_width / 2, w_height / 2 };
 	Vec2 p_velocity = { 0,0 };
-	float angle = 200;
+	float angle = 0;
 	auto entity = m_entities.add_entity("player");
 	entity->transform = std::make_shared<Ctransform>(p_pos, p_velocity, angle);
-	entity->shape = std::make_shared<Cshape>(p_radius, p_segment, sf::Color::Black, sf::Color::Red, p_thickness);
+	entity->shape = std::make_shared<Cshape>(p_radius, p_segment, sf::Color::Black, p_thickness);
 	entity->input = std::make_shared<Cinput>();
+	entity->shape->load_character("player");
 	entity->collision_radius = std::make_shared<Ccollision>(p_radius + p_thickness);
 	player = entity;
 }
@@ -354,8 +365,15 @@ void Game::collision()
 			float dist = p->transform->pos.dist(e->transform->pos);
 			if (dist < p->collision_radius->radius + e->collision_radius->radius)
 			{
+				p_e_collision_count++;
+				if (p_e_collision_count > 2)
+				{
+					sf::sleep(sf::seconds(3));
+					window.close();
+				}
 				p->transform->pos = { w_width / 2,w_height / 2 };
-				if (score > 20)
+				e->destroy();
+				if (score >= 20)
 				{
 					score -= 20;
 				}
@@ -401,4 +419,28 @@ float get_random(float min, float max) {
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> dis(min, max);
 	return dis(gen);
+}
+
+std::string get_enemy_image()
+{
+	int e_choose = (int)get_random(1, 6);
+	switch (e_choose)
+	{
+	case 1:
+		return "enemy1";
+		break;
+	case 2:
+		return "enemy2";
+		break;
+
+	case 3:
+		return "enemy3";
+		break;
+	case 4:
+		return "enemy4";
+		break;
+	case 5:
+		return "enemy5";
+		break;
+	}
 }

@@ -17,14 +17,23 @@ class Cshape
 {
 public:
 	sf::CircleShape circle;
+	sf::Texture character;
+
 	Cshape() {};
-	Cshape(const float radius, const float point, const sf::Color& fill_color, const sf::Color& border_color, float thickness)
+	Cshape(const float radius, const float point, const sf::Color& border_color, float thickness)
 		:circle(radius, point)
 	{
-		circle.setFillColor(fill_color);
 		circle.setOrigin(radius, radius);
 		circle.setOutlineThickness(thickness);
 		circle.setOutlineColor(border_color);
+	}
+
+	void load_character(std::string character_name) {
+		if (!character.loadFromFile("images/" + character_name + ".png"))
+		{
+			std::cout << "Failure to load" << character_name;
+		}
+		circle.setTexture(&character);
 	}
 };
 
