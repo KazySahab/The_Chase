@@ -58,6 +58,7 @@ void Game::run()
 			m_entities.update();
 			if (e_spawn_time.getElapsedTime().asSeconds() > e_spawn_interval)
 			{
+				 big_e_spawn_interval++;
 				spawn_enemy();
 				e_spawn_time.restart();
 			}
@@ -196,6 +197,23 @@ void Game::move_entity()
 		b->shape->circle.setPosition(b->transform->pos.x, b->transform->pos.y);
 		b->shape->circle.rotate(b->transform->angle);
 	}
+	for (auto& be : m_entities.get_entities("big_enemies"))
+	{
+		Vec2 direction;
+		direction.x =   player->transform->pos.x - be->transform->pos.x;
+		direction.y =  player->transform->pos.y - be->transform->pos.y;
+		float length = sqrt(pow(direction.x, 2) + pow(direction.y, 2));
+		if (length > 0)
+		{
+			direction.x /= length;
+			direction.y /= length;
+		}
+		
+		be->transform->pos.x += be->transform->velocity.x*direction.x*delta_time;
+		be->transform->pos.y += be->transform->velocity.y * direction.y*delta_time;
+		be->shape->circle.setPosition(be->transform->pos.x, be->transform->pos.y);
+		be->shape->circle.rotate(be->transform->angle * delta_time);
+	}
 
 }
 
@@ -207,6 +225,10 @@ void Game::render()
 	for (auto& e : m_entities.get_entities("enemies"))
 	{
 		window.draw(e->shape->circle);
+	}
+	for (auto& be : m_entities.get_entities("big_enemies"))
+	{
+		window.draw(be->shape->circle);
 	}
 	for (auto& b : m_entities.get_entities("bullets"))
 	{
@@ -221,20 +243,40 @@ void Game::render()
 
 void Game::spawn_enemy()
 {
+
+	//Regular_Enemy
 	float e_radius = get_random(10, 20);
 	float e_thickness = 5;
 	float angle = 200;
 	Vec2 e_pos = { get_random(50, w_width - 50), get_random(50, w_height - 50) };
 	Vec2 e_velocity = { get_random(150,200),get_random(150,200) };
-	sf::Color e_fill_color = sf::Color::Transparent;
 
 	auto enemy = m_entities.add_entity("enemies");
+	
 	enemy->transform = std::make_shared<Ctransform>(e_pos, e_velocity, angle);
-	enemy->shape = std::make_shared<Cshape>(e_radius, 30, sf::Color::Black, e_thickness);
+	enemy->shape = std::make_shared<Cshape>(e_radius,sf::Color::Black,e_thickness);
 	enemy->shape->load_character(get_enemy_image());
 	enemy->collision_radius = std::make_shared<Ccollision>(e_radius + e_thickness);
 	enemy->transform->velocity *= delta_time;
-	score += 5;
+
+	//Big_Enemy
+	if (big_e_spawn_interval % 5==0)
+	{
+		float be_radius = 25+(big_e_spawn_interval/5);
+		float be_thickness = 5;
+		float be_angle = 100;
+		Vec2 be_pos = { w_width / 2,w_height / 2 };
+		Vec2 be_velocity = { float(120+big_e_spawn_interval/1.25), float(120 + big_e_spawn_interval / 1.25) };
+
+		auto big_enemy = m_entities.add_entity("big_enemies");
+
+		big_enemy->transform = std::make_shared<Ctransform>(be_pos,be_velocity, be_angle);
+		big_enemy->shape = std::make_shared<Cshape>(be_radius,sf::Color::Red, be_thickness);
+		big_enemy->shape->load_character(get_enemy_image());
+		big_enemy->collision_radius = std::make_shared<Ccollision>(be_radius+be_thickness);
+		big_enemy->life = std::make_shared<Clife>();
+		big_enemy->life->set_health(3+(big_e_spawn_interval/5));
+	}
 }
 
 void Game::spawn_bullet(std::shared_ptr<Entity>player, const Vec2& target)
@@ -246,7 +288,7 @@ void Game::spawn_bullet(std::shared_ptr<Entity>player, const Vec2& target)
 
 		auto bullet = m_entities.add_entity("bullets");
 		bullet->transform = std::make_shared<Ctransform>(player->transform->pos, Vec2(300, 300), 0.0f);
-		bullet->shape = std::make_shared<Cshape>(b_radius, 30.0f, sf::Color::Red, 0.0f);
+		bullet->shape = std::make_shared<Cshape>(b_radius, sf::Color::Red, 0.0f);
 		bullet->collision_radius = std::make_shared<Ccollision>(b_radius);
 		bullet->life = std::make_shared<Clife>(10000, m_current_frame);
 		bullet->shape->load_character("bullet");
@@ -274,8 +316,9 @@ void Game::spawn_player()
 	Vec2 p_velocity = { 0,0 };
 	
 	auto entity = m_entities.add_entity("player");
+
 	entity->transform = std::make_shared<Ctransform>(p_pos, p_velocity, angle);
-	entity->shape = std::make_shared<Cshape>(p_radius, p_segment, sf::Color::Black, p_thickness);
+	entity->shape = std::make_shared<Cshape>(p_radius,sf::Color::Black, p_thickness);
 	entity->input = std::make_shared<Cinput>();
 	entity->shape->load_character("player");
 	entity->collision_radius = std::make_shared<Ccollision>(p_radius + p_thickness);
@@ -328,22 +371,42 @@ void Game::collision()
 	{
 		for (auto& e : m_entities.get_entities("enemies"))
 		{
-			float dist = p->transform->pos.dist(e->transform->pos);
-			if (dist < p->collision_radius->radius + e->collision_radius->radius)
+			if (p->is_active() && e->is_active())
 			{
-				p_e_collision_count++;
-				if (p_e_collision_count > 2)
+				float dist = p->transform->pos.dist(e->transform->pos);
+				if (dist < p->collision_radius->radius + e->collision_radius->radius)
 				{
-					sf::sleep(sf::seconds(3));
-					window.close();
-				}
-				p->transform->pos = { w_width / 2,w_height / 2 };
-				e->destroy();
-				if (score >= 20)
-				{
-					score -= 20;
+					p_e_collision_count++;
+					p->transform->pos = { p->collision_radius->radius,p->collision_radius->radius };
+					e->destroy();
 				}
 			}
+		}
+		for (auto& be : m_entities.get_entities("big_enemies"))
+		{
+			if (be->is_active() && p->is_active())
+			{
+				float dist = p->transform->pos.dist(be->transform->pos);
+				if (dist < p->collision_radius->radius + be->collision_radius->radius)
+				{
+					be->life->health--;
+					p_e_collision_count++;
+					if (be->life->health < 1)
+					{
+						score += 10;
+						be->destroy();
+					}
+					
+					p->transform->pos = { p->collision_radius->radius,p->collision_radius->radius };
+
+				}
+
+			}
+		}
+		if (p_e_collision_count > 2)
+		{
+			sf::sleep(sf::seconds(3));
+			window.close();
 		}
 	}
 
@@ -360,9 +423,24 @@ void Game::collision()
 					b->destroy();
 					e->destroy();
 				}
-
 			}
-
+		}
+		for (auto& be : m_entities.get_entities("big_enemies"))
+		{
+			if (be->is_active() && b->is_active())
+			{
+				float dist = b->transform->pos.dist(be->transform->pos);
+				if (dist < be->collision_radius->radius + b->collision_radius->radius)
+				{
+					be->life->health--;
+					if (be->life->health<1)
+					{
+						score+=10;
+						be->destroy();
+					}
+					b->destroy();
+				}
+			}
 		}
 	}
 }

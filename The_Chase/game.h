@@ -24,13 +24,17 @@ private:
 	Entity_manager m_entities;
 	std::shared_ptr<Entity> player;
 	
-	int bullet_no = 30;
-	float delta_time = 0;
-	int score = 0;
 	int m_current_frame = 0;
+	int bullet_no = 30;
+	int score = 0;
 	int p_e_collision_count = 0;
+	int big_e_spawn_interval = 0;
+	int big_e_health = 5;
+
+
+	float delta_time = 0;
+	float e_spawn_interval = 3.0f;
 	
-	float e_spawn_interval = 2.0f;
 
 	void move_entity();
 	void handle_input();

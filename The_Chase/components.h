@@ -20,8 +20,8 @@ public:
 	sf::Texture character;
 
 	Cshape() {};
-	Cshape(const float radius, const float point, const sf::Color& border_color, float thickness)
-		:circle(radius, point)
+	Cshape(const float radius, const sf::Color& border_color, float thickness)
+		:circle(radius)
 	{
 		circle.setOrigin(radius, radius);
 		circle.setOutlineThickness(thickness);
@@ -63,8 +63,16 @@ class Clife
 public:
 	int lifespan = 0;
 	int frame_created = 0;
+	int health = 0;
+	Clife() {}
 	Clife(int duration, int created)
 		:lifespan(duration),
-		frame_created(created) {}
+		frame_created(created)
+	{}
+
+	void set_health(int health)
+	{
+		this->health = health;
+	}
 };
 
