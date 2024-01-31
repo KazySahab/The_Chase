@@ -9,6 +9,7 @@ class Entity
 	std::string m_tag = "Default";
 
 public:
+
 	std::shared_ptr<Ctransform> transform;
 	std::shared_ptr<Cshape> shape;
 	std::shared_ptr<Cinput> input;
@@ -17,7 +18,8 @@ public:
 
 	Entity(const std::string& tag, const size_t& id)
 		:m_id(id),
-		m_tag(tag) {}
+		m_tag(tag) 
+	{}
 
 	bool  is_active() const;
 	const std::string& tag() const;

@@ -1,11 +1,10 @@
 #include "game.h"
 
-
 const float w_width = sf::VideoMode::getDesktopMode().width;
 const float w_height = sf::VideoMode::getDesktopMode().height;
 
 Game::Game()
-	:window(sf::VideoMode(w_width, w_height), "Don't Touch")
+	:window(sf::VideoMode(w_width, w_height), "The Chase")
 {
 	if (!font.loadFromFile("font/roboto.ttf"))
 	{
@@ -40,7 +39,6 @@ Game::Game()
 	help_text.setFillColor(sf::Color::Black);
 	help_text.setPosition(sf::Vector2f{ w_width / 2 - 120,10 });
 
-
 	background.setSize(sf::Vector2f(w_width, w_height));
 	background.setTexture(&background_image);
 }
@@ -54,8 +52,8 @@ void Game::run()
 	{
 		sf::Time frame_time = delta_clock.restart();
 		delta_time = frame_time.asSeconds();
-		try
-		{
+
+		
 			handle_input();
 			m_entities.update();
 			if (e_spawn_time.getElapsedTime().asSeconds() > e_spawn_interval)
@@ -72,6 +70,7 @@ void Game::run()
 			score_text.setString("Score : " + std::to_string(score) + "\n Life :" + std::to_string(3 - p_e_collision_count));
 			bullet_reload_time.setString("Reload Time (30s) : " + std::to_string((int)bullet_time.getElapsedTime().asSeconds()));
 			bullet_num.setString("Remaining Bullets : " + std::to_string(bullet_no));
+			
 			if (!is_game_paused)
 			{
 				move_entity();
@@ -79,16 +78,9 @@ void Game::run()
 				render();
 			}
 			life_spawn();
-
 			m_current_frame++;
 
-		}
-
-
-		catch (const std::exception& e)
-		{
-			std::cerr << "Unhandled exception: " << e.what() << std::endl;
-		}
+		
 	}
 }
 
@@ -105,75 +97,54 @@ void Game::handle_input()
 		{
 			switch (event.key.code)
 			{
-			case sf::Keyboard::W:
-			{
-				player->input->up = true;
-				break;
+				case sf::Keyboard::W:
+					player->input->up = true;
+					break;
+				
+				case sf::Keyboard::A:
+					player->input->left = true;
+					break;
+				
+				case sf::Keyboard::S:
+					player->input->down = true;
+					break;
+				
+				case sf::Keyboard::D:
+					player->input->right = true;
+					break;
+				
+				case sf::Keyboard::P:
+					this->is_game_paused = true;
+					break;
 
-			}
-			case sf::Keyboard::A:
-			{
-				player->input->left = true;
-				break;
-
-			}
-			case sf::Keyboard::S:
-			{
-				player->input->down = true;
-				break;
-
-			}
-			case sf::Keyboard::D:
-			{
-				player->input->right = true;
-				break;
-
-			}
-			case sf::Keyboard::P:
-			{
-				this->is_game_paused = true;
-				break;
-			}
-			case sf::Keyboard::Escape:
-			{
-				this->is_game_exit = true;
-				break;
-			}
+				case sf::Keyboard::Escape:
+					this->is_game_exit = true;
+					break;
 			}
 		}
 		if (event.type == sf::Event::KeyReleased)
 		{
 			switch (event.key.code)
 			{
-			case sf::Keyboard::W:
-			{
-				player->input->up = false;
-				break;
+				case sf::Keyboard::W:
+					player->input->up = false;
+					break;
 
-			}
-			case sf::Keyboard::A:
-			{
-				player->input->left = false;
-				break;
+				case sf::Keyboard::A:
+					player->input->left = false;
+					break;
 
-			}
-			case sf::Keyboard::S:
-			{
-				player->input->down = false;
-				break;
-
-			}
-			case sf::Keyboard::D:
-			{
-				player->input->right = false;
-				break;
-
-			}
-			case sf::Keyboard::P:
-			{
-				this->is_game_paused = false;
-				break;
-			}
+				case sf::Keyboard::S:
+					player->input->down = false;
+					break;
+				
+				case sf::Keyboard::D:
+					player->input->right = false;
+					break;
+				
+				case sf::Keyboard::P:
+					this->is_game_paused = false;
+					break;
 			}
 		}
 		if (event.type == sf::Event::MouseButtonPressed)
@@ -213,10 +184,8 @@ void Game::move_entity()
 	player->shape->circle.setPosition(player->transform->pos.x, player->transform->pos.y);
 	player->shape->circle.rotate(player->transform->angle * delta_time);
 
-
 	for (auto& e : m_entities.get_entities("enemies"))
 	{
-
 		e->transform->pos += e->transform->velocity;
 		e->shape->circle.setPosition(e->transform->pos.x, e->transform->pos.y);
 		e->shape->circle.rotate(e->transform->angle * delta_time);
@@ -254,10 +223,9 @@ void Game::spawn_enemy()
 {
 	float e_radius = get_random(10, 20);
 	float e_thickness = 5;
+	float angle = 200;
 	Vec2 e_pos = { get_random(50, w_width - 50), get_random(50, w_height - 50) };
 	Vec2 e_velocity = { get_random(150,200),get_random(150,200) };
-	float angle = 200;
-
 	sf::Color e_fill_color = sf::Color::Transparent;
 
 	auto enemy = m_entities.add_entity("enemies");
@@ -274,13 +242,15 @@ void Game::spawn_bullet(std::shared_ptr<Entity>player, const Vec2& target)
 	if (bullet_no > 0)
 	{
 		float b_radius = 5.0f;
+		Vec2 direction;
+
 		auto bullet = m_entities.add_entity("bullets");
 		bullet->transform = std::make_shared<Ctransform>(player->transform->pos, Vec2(300, 300), 0.0f);
 		bullet->shape = std::make_shared<Cshape>(b_radius, 30.0f, sf::Color::Red, 0.0f);
 		bullet->collision_radius = std::make_shared<Ccollision>(b_radius);
 		bullet->life = std::make_shared<Clife>(10000, m_current_frame);
 		bullet->shape->load_character("bullet");
-		Vec2 direction;
+	
 		direction.x = target.x - player->transform->pos.x;
 		direction.y = target.y - player->transform->pos.y;
 		float length = sqrt(pow(direction.x, 2) + pow(direction.y, 2));
@@ -292,11 +262,6 @@ void Game::spawn_bullet(std::shared_ptr<Entity>player, const Vec2& target)
 		bullet->transform->velocity *= direction;
 		bullet->transform->velocity *= delta_time;
 	}
-
-
-
-
-
 }
 
 void Game::spawn_player()
@@ -304,9 +269,10 @@ void Game::spawn_player()
 	float p_radius = 25;
 	float p_segment = 30;
 	float p_thickness = 2;
+	float angle = 0;
 	Vec2 p_pos = { w_width / 2, w_height / 2 };
 	Vec2 p_velocity = { 0,0 };
-	float angle = 0;
+	
 	auto entity = m_entities.add_entity("player");
 	entity->transform = std::make_shared<Ctransform>(p_pos, p_velocity, angle);
 	entity->shape = std::make_shared<Cshape>(p_radius, p_segment, sf::Color::Black, p_thickness);
@@ -390,7 +356,6 @@ void Game::collision()
 				float dist = b->transform->pos.dist(e->transform->pos);
 				if (dist < e->collision_radius->radius + b->collision_radius->radius)
 				{
-
 					score += 5;
 					b->destroy();
 					e->destroy();
@@ -400,8 +365,6 @@ void Game::collision()
 
 		}
 	}
-
-
 }
 void Game::life_spawn()
 {
@@ -426,21 +389,20 @@ std::string get_enemy_image()
 	int e_choose = (int)get_random(1, 6);
 	switch (e_choose)
 	{
-	case 1:
-		return "enemy1";
-		break;
-	case 2:
-		return "enemy2";
-		break;
-
-	case 3:
-		return "enemy3";
-		break;
-	case 4:
-		return "enemy4";
-		break;
-	case 5:
-		return "enemy5";
-		break;
+		case 1:
+			return "enemy1";
+			break;
+		case 2:
+			return "enemy2";
+			break;
+		case 3:
+			return "enemy3";
+			break;
+		case 4:
+			return "enemy4";
+			break;
+		case 5:
+			return "enemy5";
+			break;
 	}
 }

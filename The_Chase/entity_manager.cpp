@@ -4,8 +4,6 @@ std::shared_ptr<Entity> Entity_manager::add_entity(const std::string& tag)
 {
 	auto e = std::make_shared<Entity>(tag, m_total_entities++);
 	m_to_add.push_back(e);
-	//m_entities.push_back(e);
-	//m_entity_map[tag].push_back(e);
 	return e;
 }
 
