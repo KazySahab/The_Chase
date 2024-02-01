@@ -44,6 +44,7 @@ private:
 	void spawn_enemy();
 	void spawn_player();
 	void spawn_bullet(std::shared_ptr<Entity>player, const Vec2& target);
+	void additional_game_functions();
 
 	bool is_game_paused = false;
 	bool is_game_exit = false;

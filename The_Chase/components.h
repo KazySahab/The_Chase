@@ -33,6 +33,7 @@ public:
 		{
 			std::cout << "Failure to load" << character_name;
 		}
+		character.setSmooth(true);
 		circle.setTexture(&character);
 	}
 };

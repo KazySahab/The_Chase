@@ -58,7 +58,7 @@ void Game::run()
 			m_entities.update();
 			if (e_spawn_time.getElapsedTime().asSeconds() > e_spawn_interval)
 			{
-				 big_e_spawn_interval++;
+				big_e_spawn_interval++;
 				spawn_enemy();
 				e_spawn_time.restart();
 			}
@@ -159,6 +159,81 @@ void Game::handle_input()
 				}
 			}
 		}
+
+		//joystick Input
+
+		if (sf::Joystick::isConnected(0))
+		{
+			if (event.type == sf::Event::JoystickMoved)
+			{
+				float j_move_x = sf::Joystick::getAxisPosition(0, sf::Joystick::X);
+				float j_move_y = sf::Joystick::getAxisPosition(0, sf::Joystick::Y);
+				float move_limit = 20.0f;
+
+				//move_player
+				if (j_move_x < -move_limit)
+				{
+					player->input->left = true;
+				}
+				if (j_move_x > move_limit)
+				{
+					player->input->right = true;
+				}
+				if (j_move_y < -move_limit)
+				{
+					player->input->up = true;
+				}
+				if (j_move_y > move_limit)
+				{
+					player->input->down = true;
+				}
+
+				//reset move_player
+
+				if (j_move_x > -move_limit)
+				{
+					player->input->left = false;
+				}
+				if (j_move_x < move_limit)
+				{
+					player->input->right = false;
+				}
+				if (j_move_y > -move_limit)
+				{
+					player->input->up = false;
+				}
+				if (j_move_y < move_limit)
+				{
+					player->input->down = false;
+				}
+			}
+
+			if (event.type == sf::Event::JoystickButtonPressed)
+			{
+				if (sf::Joystick::isButtonPressed(0, 0))
+				{
+					spawn_bullet(player, Vec2(player->transform->pos.x, player->transform->pos.y + 100));
+				}
+				else if (sf::Joystick::isButtonPressed(0, 1))
+				{
+					spawn_bullet(player, Vec2(player->transform->pos.x + 100, player->transform->pos.y));
+				}
+				else if (sf::Joystick::isButtonPressed(0, 2))
+				{
+					spawn_bullet(player, Vec2(player->transform->pos.x - 100, player->transform->pos.y));
+				}
+				else if (sf::Joystick::isButtonPressed(0, 3))
+				{
+					spawn_bullet(player, Vec2(player->transform->pos.x, player->transform->pos.y - 100));
+				}
+
+				if (bullet_no > 0)
+				{
+					bullet_no -= 1;
+				}
+
+			}
+		}
 	}
 }
 void Game::move_entity()
@@ -248,9 +323,12 @@ void Game::spawn_enemy()
 	float e_radius = get_random(10, 20);
 	float e_thickness = 5;
 	float angle = 200;
+	Vec2 e_velocity = { 0,0 };
 	Vec2 e_pos = { get_random(50, w_width - 50), get_random(50, w_height - 50) };
-	Vec2 e_velocity = { get_random(150,200),get_random(150,200) };
-
+	if (score >=0 && score< 100)  e_velocity = { get_random(150,200),get_random(150,200) };
+	else if(score>100&&score<300)  e_velocity = { get_random(180,220),get_random(180,220) };
+	else if (score > 300 && score < 500)  e_velocity = { get_random(200,250),get_random(200,250) };
+	else if (score > 500)  e_velocity = { get_random(250,300),get_random(250,300) };
 	auto enemy = m_entities.add_entity("enemies");
 	
 	enemy->transform = std::make_shared<Ctransform>(e_pos, e_velocity, angle);
@@ -455,11 +533,11 @@ void Game::life_spawn()
 	}
 }
 
-float get_random(float min, float max) {
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<float> dis(min, max);
-	return dis(gen);
+
+void Game:: additional_game_functions()
+{
+	
+
 }
 
 std::string get_enemy_image()
@@ -483,4 +561,11 @@ std::string get_enemy_image()
 			return "enemy5";
 			break;
 	}
+}
+
+float get_random(float min, float max) {
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> dis(min, max);
+	return dis(gen);
 }
