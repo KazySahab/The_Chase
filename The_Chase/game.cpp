@@ -533,13 +533,6 @@ void Game::life_spawn()
 	}
 }
 
-
-void Game:: additional_game_functions()
-{
-	
-
-}
-
 std::string get_enemy_image()
 {
 	int e_choose = (int)get_random(1, 6);
