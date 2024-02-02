@@ -2,11 +2,12 @@
 
 const float w_width = sf::VideoMode::getDesktopMode().width;
 const float w_height = sf::VideoMode::getDesktopMode().height;
+int game_pause_counter = 0;
 
 Game::Game()
 	:window(sf::VideoMode(w_width, w_height), "The Chase")
 {
-	if (!font.loadFromFile("font/roboto.ttf"))
+	if (!font.loadFromFile("font/h_ghost.ttf"))
 	{
 		throw std::runtime_error("Failed to load font.");
 	}
@@ -18,25 +19,25 @@ Game::Game()
 	score_text.setFont(font);
 	score_text.setCharacterSize(24);
 	score_text.setStyle(sf::Text::Bold);
-	score_text.setFillColor(sf::Color::Black);
+	score_text.setFillColor(sf::Color::White);
 	score_text.setPosition(sf::Vector2f{ 50,10 });
 
 	bullet_num.setFont(font);
 	bullet_num.setCharacterSize(24);
 	bullet_num.setStyle(sf::Text::Bold);
-	bullet_num.setFillColor(sf::Color::Black);
+	bullet_num.setFillColor(sf::Color::White);
 	bullet_num.setPosition(sf::Vector2f{ w_width - 300,10 });
 
 	bullet_reload_time.setFont(font);
 	bullet_reload_time.setCharacterSize(24);
 	bullet_reload_time.setStyle(sf::Text::Bold);
-	bullet_reload_time.setFillColor(sf::Color::Black);
+	bullet_reload_time.setFillColor(sf::Color::White);
 	bullet_reload_time.setPosition(sf::Vector2f{ w_width - 300,50 });
 
 	help_text.setFont(font);
 	help_text.setCharacterSize(24);
 	help_text.setStyle(sf::Text::Bold);
-	help_text.setFillColor(sf::Color::Black);
+	help_text.setFillColor(sf::Color::White);
 	help_text.setPosition(sf::Vector2f{ w_width / 2 - 120,10 });
 
 	background.setSize(sf::Vector2f(w_width, w_height));
@@ -47,13 +48,15 @@ Game::Game()
 void Game::run()
 {
 	spawn_player();
-
+	auto background_sound_1 = std::make_shared<Sound>("background_1",true,20);
+	auto background_sound_2 = std::make_shared<Sound>("background_2", true, 30);
+	background_sound_1->sound.play();
+	background_sound_2->sound.play();
 	while (!is_game_exit)
 	{
 		sf::Time frame_time = delta_clock.restart();
 		delta_time = frame_time.asSeconds();
 
-		
 			handle_input();
 			m_entities.update();
 			if (e_spawn_time.getElapsedTime().asSeconds() > e_spawn_interval)
@@ -77,11 +80,31 @@ void Game::run()
 				move_entity();
 				collision();
 				render();
+				if (background_sound_1->is_paused && background_sound_2->is_paused)
+				{
+					background_sound_1->sound.play();
+					background_sound_1->is_paused=false;
+					background_sound_2->sound.play();
+					background_sound_2->is_paused = false;
+				}
 			}
-			life_spawn();
+			if (is_game_paused)
+			{
+				background_sound_1->sound.pause();
+				background_sound_1->is_paused = true;
+				background_sound_2->sound.pause();
+				background_sound_2->is_paused = true;
+			}
+			
+			check_bullet_health();
 			m_current_frame++;
 
 		
+	}
+	if (is_game_exit)
+	{
+		background_sound_1->sound.stop();
+		background_sound_2->sound.stop();
 	}
 }
 
@@ -92,7 +115,11 @@ void Game::handle_input()
 
 
 		if (event.type == sf::Event::Closed)
+		{
 			window.close();
+		}
+			
+
 
 		if (event.type == sf::Event::KeyPressed)
 		{
@@ -115,7 +142,9 @@ void Game::handle_input()
 					break;
 				
 				case sf::Keyboard::P:
-					this->is_game_paused = true;
+					if (game_pause_counter % 2 == 0) this->is_game_paused = true;
+					else this->is_game_paused = false;
+					game_pause_counter++;
 					break;
 
 				case sf::Keyboard::Escape:
@@ -141,10 +170,6 @@ void Game::handle_input()
 				
 				case sf::Keyboard::D:
 					player->input->right = false;
-					break;
-				
-				case sf::Keyboard::P:
-					this->is_game_paused = false;
 					break;
 			}
 		}
@@ -522,11 +547,11 @@ void Game::collision()
 		}
 	}
 }
-void Game::life_spawn()
+void Game::check_bullet_health()
 {
 	for (auto& b : m_entities.get_entities("bullets"))
 	{
-		if (b->life->lifespan - (m_current_frame - b->life->frame_created) < 0)
+		if (b->life->lifespan - (m_current_frame - b->life->frame_created) <= 0)
 		{
 			b->destroy();
 		}

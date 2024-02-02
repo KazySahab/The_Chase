@@ -1,6 +1,7 @@
 #pragma once
 #include "random"
 #include "entity_manager.h"
+#include "sound.h"
 
 class Game
 {
@@ -40,14 +41,15 @@ private:
 	void handle_input();
 	void render();
 	void collision();
-	void life_spawn();
+	void check_bullet_health();
 	void spawn_enemy();
 	void spawn_player();
 	void spawn_bullet(std::shared_ptr<Entity>player, const Vec2& target);
-	void additional_game_functions();
+	
 
 	bool is_game_paused = false;
 	bool is_game_exit = false;
+
 public:
 	Game();
 	void run();
