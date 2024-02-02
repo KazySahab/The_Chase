@@ -1,57 +1,31 @@
 #include "game.h"
 
-const float w_width = sf::VideoMode::getDesktopMode().width;
-const float w_height = sf::VideoMode::getDesktopMode().height;
+
+
+
+
 int game_pause_counter = 0;
 
 Game::Game()
 	:window(sf::VideoMode(w_width, w_height), "The Chase")
 {
-	if (!font.loadFromFile("font/h_ghost.ttf"))
-	{
-		throw std::runtime_error("Failed to load font.");
-	}
 	if (!background_image.loadFromFile("images/background_image.jpg"))
 	{
 		std::cout << "background Load failed";
 	}
 
-	score_text.setFont(font);
-	score_text.setCharacterSize(24);
-	score_text.setStyle(sf::Text::Bold);
-	score_text.setFillColor(sf::Color::White);
-	score_text.setPosition(sf::Vector2f{ 50,10 });
-
-	bullet_num.setFont(font);
-	bullet_num.setCharacterSize(24);
-	bullet_num.setStyle(sf::Text::Bold);
-	bullet_num.setFillColor(sf::Color::White);
-	bullet_num.setPosition(sf::Vector2f{ w_width - 300,10 });
-
-	bullet_reload_time.setFont(font);
-	bullet_reload_time.setCharacterSize(24);
-	bullet_reload_time.setStyle(sf::Text::Bold);
-	bullet_reload_time.setFillColor(sf::Color::White);
-	bullet_reload_time.setPosition(sf::Vector2f{ w_width - 300,50 });
-
-	help_text.setFont(font);
-	help_text.setCharacterSize(24);
-	help_text.setStyle(sf::Text::Bold);
-	help_text.setFillColor(sf::Color::White);
-	help_text.setPosition(sf::Vector2f{ w_width / 2 - 120,10 });
-
 	background.setSize(sf::Vector2f(w_width, w_height));
 	background.setTexture(&background_image);
+	load_high_score();
 }
 
 
 void Game::run()
 {
 	spawn_player();
-	auto background_sound_1 = std::make_shared<Sound>("background_1",true,20);
-	auto background_sound_2 = std::make_shared<Sound>("background_2", true, 30);
-	background_sound_1->sound.play();
-	background_sound_2->sound.play();
+	//background_sound_1->sound.play();
+	//background_sound_2->sound.play();
+	
 	while (!is_game_exit)
 	{
 		sf::Time frame_time = delta_clock.restart();
@@ -70,10 +44,10 @@ void Game::run()
 				bullet_no += 30;
 				bullet_time.restart();
 			}
-			help_text.setString("Press 'ESC' to exit or Hold 'P' to pause");
-			score_text.setString("Score : " + std::to_string(score) + "\n Life :" + std::to_string(3 - p_e_collision_count));
-			bullet_reload_time.setString("Reload Time (30s) : " + std::to_string((int)bullet_time.getElapsedTime().asSeconds()));
-			bullet_num.setString("Remaining Bullets : " + std::to_string(bullet_no));
+			score_text->write.setString(" High Score : " + std::to_string(high_score) + "\n Score : " + std::to_string(score));
+			rem_life_text->write.setString(" Life :" + std::to_string(3 - p_e_collision_count));
+			bullet_reload_time->write.setString("Reload Time (30s) : " + std::to_string((int)bullet_time.getElapsedTime().asSeconds()));
+			bullet_num->write.setString("Remaining Bullets : " + std::to_string(bullet_no));
 			
 			if (!is_game_paused)
 			{
@@ -97,6 +71,7 @@ void Game::run()
 			}
 			
 			check_bullet_health();
+			save_high_score();
 			m_current_frame++;
 
 		
@@ -178,6 +153,7 @@ void Game::handle_input()
 			if (event.mouseButton.button == sf::Mouse::Left)
 			{
 				spawn_bullet(player, Vec2(event.mouseButton.x, event.mouseButton.y));
+			
 				if (bullet_no > 0)
 				{
 					bullet_no -= 1;
@@ -335,10 +311,10 @@ void Game::render()
 	{
 		window.draw(b->shape->circle);
 	}
-	window.draw(score_text);
-	window.draw(bullet_num);
-	window.draw(bullet_reload_time);
-	window.draw(help_text);
+	window.draw(score_text->write);
+	window.draw(rem_life_text->write);
+	window.draw(bullet_num->write);
+	window.draw(bullet_reload_time->write);
 	window.display();
 }
 
@@ -369,13 +345,17 @@ void Game::spawn_enemy()
 		float be_radius = 25+(big_e_spawn_interval/5);
 		float be_thickness = 5;
 		float be_angle = 100;
-		Vec2 be_pos = { w_width / 2,w_height / 2 };
+		Vec2 be_pos = { 0,0 };
+		int be_spawn_pos =(int) get_random(1, 4);
+		if (be_spawn_pos == 1)  be_pos = { get_random(0,w_width),-100 };
+		if (be_spawn_pos == 2)  be_pos = { get_random(w_width,w_width+200),get_random(0,w_height)};
+		if (be_spawn_pos == 3)  be_pos = { get_random(0,w_width),w_height+100 };
+		if (be_spawn_pos == 4)  be_pos = { -100,get_random(0,w_height) };
 		Vec2 be_velocity = { float(120+big_e_spawn_interval/1.25), float(120 + big_e_spawn_interval / 1.25) };
-
 		auto big_enemy = m_entities.add_entity("big_enemies");
 
 		big_enemy->transform = std::make_shared<Ctransform>(be_pos,be_velocity, be_angle);
-		big_enemy->shape = std::make_shared<Cshape>(be_radius,sf::Color::Red, be_thickness);
+		big_enemy->shape = std::make_shared<Cshape>(be_radius,sf::Color::Black, be_thickness);
 		big_enemy->shape->load_character(get_enemy_image());
 		big_enemy->collision_radius = std::make_shared<Ccollision>(be_radius+be_thickness);
 		big_enemy->life = std::make_shared<Clife>();
@@ -385,13 +365,15 @@ void Game::spawn_enemy()
 
 void Game::spawn_bullet(std::shared_ptr<Entity>player, const Vec2& target)
 {
+	
+
 	if (bullet_no > 0)
 	{
 		float b_radius = 5.0f;
 		Vec2 direction;
 
 		auto bullet = m_entities.add_entity("bullets");
-		bullet->transform = std::make_shared<Ctransform>(player->transform->pos, Vec2(300, 300), 0.0f);
+		bullet->transform = std::make_shared<Ctransform>(player->transform->pos, Vec2(400, 400), 0.0f);
 		bullet->shape = std::make_shared<Cshape>(b_radius, sf::Color::Red, 0.0f);
 		bullet->collision_radius = std::make_shared<Ccollision>(b_radius);
 		bullet->life = std::make_shared<Clife>(10000, m_current_frame);
@@ -406,6 +388,7 @@ void Game::spawn_bullet(std::shared_ptr<Entity>player, const Vec2& target)
 			direction.y /= length;
 		}
 		bullet->transform->velocity *= direction;
+		bullet_sound->sound.play();
 	}
 }
 
@@ -413,7 +396,7 @@ void Game::spawn_player()
 {
 	float p_radius = 25;
 	float p_segment = 30;
-	float p_thickness = 2;
+	float p_thickness = 5;
 	float angle = 0;
 	Vec2 p_pos = { w_width / 2, w_height / 2 };
 	Vec2 p_velocity = { 0,0 };
@@ -480,7 +463,7 @@ void Game::collision()
 				if (dist < p->collision_radius->radius + e->collision_radius->radius)
 				{
 					p_e_collision_count++;
-					p->transform->pos = { p->collision_radius->radius,p->collision_radius->radius };
+					p->transform->pos = { w_width/2,w_height/2 };
 					e->destroy();
 				}
 			}
@@ -586,4 +569,36 @@ float get_random(float min, float max) {
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> dis(min, max);
 	return dis(gen);
+}
+
+void Game::load_high_score()
+{
+	std::fstream hs_file("high_score.dat", std::ios::in | std::ios::binary);
+	if (hs_file)
+	{
+		hs_file >> high_score;
+		hs_file.close();
+	}
+	else
+	{
+		std::cout << "cant open";
+	}
+}
+
+void Game::save_high_score()
+{
+	if (score > high_score)
+	{
+		high_score = score;
+		std::fstream hs_file("high_score.dat", std::ios::out | std::ios::binary);
+		if (hs_file.is_open())
+		{
+			hs_file << high_score;
+			hs_file.close();
+		}
+		else
+		{
+			std::cout << "error";
+		}
+	}
 }

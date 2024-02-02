@@ -137,7 +137,6 @@
     <ClCompile Include="entity_manager.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="sound.cpp" />
     <ClCompile Include="vector.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +146,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="sound.h" />
+    <ClInclude Include="text.h" />
     <ClInclude Include="vector.h" />
   </ItemGroup>
   <ItemGroup>

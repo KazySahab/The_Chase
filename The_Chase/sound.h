@@ -15,8 +15,12 @@ public:
 		{
 			std::cout << "cant open audio file" << name << std::endl;
 		}
-		sound.setLoop(to_repeat);
-		sound.setVolume(vol);
+		else
+		{
+			sound.setLoop(to_repeat);
+			sound.setVolume(vol);
+		}
+		
 	}
 };
 
