@@ -268,7 +268,8 @@ void Game::move_entity()
 	}
 	for (auto& b : m_entities.get_entities("bullets"))
 	{
-		b->transform->pos += b->transform->velocity;
+		b->transform->pos.x += b->transform->velocity.x * delta_time;
+		b->transform->pos.y += b->transform->velocity.y*delta_time;
 		b->shape->circle.setPosition(b->transform->pos.x, b->transform->pos.y);
 		b->shape->circle.rotate(b->transform->angle);
 	}
@@ -294,7 +295,7 @@ void Game::move_entity()
 
 void Game::render()
 {
-	window.clear();
+	window.clear();;
 	window.draw(background);
 	window.draw(player->shape->circle);
 	for (auto& e : m_entities.get_entities("enemies"))
@@ -380,7 +381,6 @@ void Game::spawn_bullet(std::shared_ptr<Entity>player, const Vec2& target)
 			direction.y /= length;
 		}
 		bullet->transform->velocity *= direction;
-		bullet->transform->velocity *= delta_time;
 	}
 }
 
