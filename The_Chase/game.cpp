@@ -352,6 +352,7 @@ void Game::spawn_enemy()
 		if (be_spawn_pos == 3)  be_pos = { get_random(0,w_width),w_height+100 };
 		if (be_spawn_pos == 4)  be_pos = { -100,get_random(0,w_height) };
 		Vec2 be_velocity = { float(120+big_e_spawn_interval/1.25), float(120 + big_e_spawn_interval / 1.25) };
+
 		auto big_enemy = m_entities.add_entity("big_enemies");
 
 		big_enemy->transform = std::make_shared<Ctransform>(be_pos,be_velocity, be_angle);
@@ -360,6 +361,7 @@ void Game::spawn_enemy()
 		big_enemy->collision_radius = std::make_shared<Ccollision>(be_radius+be_thickness);
 		big_enemy->life = std::make_shared<Clife>();
 		big_enemy->life->set_health(3+(big_e_spawn_interval/5));
+		big_e_spawn_sound->set_choices(get_big_e_spawn_sound());
 		big_e_spawn_sound->sound.play();
 	}
 }
@@ -550,6 +552,7 @@ void Game::check_bullet_health()
 std::string get_enemy_image()
 {
 	int e_choose = (int)get_random(1, 6);
+	
 	switch (e_choose)
 	{
 		case 1:
@@ -567,6 +570,27 @@ std::string get_enemy_image()
 		case 5:
 			return "enemy5";
 			break;
+	}
+}
+
+std::string get_big_e_spawn_sound()
+{
+	int be_choose = (int)get_random(1, 5);
+	std::cout << be_choose << std::endl;
+	switch (be_choose)
+	{
+	case 1:
+		return "big_e_spawn1";
+		break;
+	case 2:
+		return "big_e_spawn2";
+		break;
+	case 3:
+		return "big_e_spawn3";
+		break;
+	case 4:
+		return "big_e_spawn4";
+		break;
 	}
 }
 
