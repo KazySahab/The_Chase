@@ -53,8 +53,10 @@ private:
 
 	std::shared_ptr<Sound> background_sound_1 = std::make_shared<Sound>("background_1", true, 20);
 	std::shared_ptr<Sound> background_sound_2 = std::make_shared<Sound>("background_2", true, 30);
-	std::shared_ptr<Sound> bullet_sound = std::make_shared<Sound>("witch", true, 80);
-	
+	std::shared_ptr<Sound> bullet_sound = std::make_shared<Sound>("bullet", false, 60);
+	std::shared_ptr<Sound> big_e_spawn_sound = std::make_shared<Sound>("big_e_spawn", false, 60);
+	std::shared_ptr<Sound> collision_sound = std::make_shared<Sound>("collision", false, 10);
+
 	std::shared_ptr<Show_text> score_text = std::make_shared<Show_text>(sf::Vector2f(30, 10));
 	std::shared_ptr<Show_text> rem_life_text = std::make_shared<Show_text>(sf::Vector2f(30, 85));
 	std::shared_ptr<Show_text> bullet_num = std::make_shared<Show_text>(sf::Vector2f(w_width - 300, 10));

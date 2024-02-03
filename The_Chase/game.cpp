@@ -23,8 +23,8 @@ Game::Game()
 void Game::run()
 {
 	spawn_player();
-	//background_sound_1->sound.play();
-	//background_sound_2->sound.play();
+	background_sound_1->sound.play();
+	background_sound_2->sound.play();
 	
 	while (!is_game_exit)
 	{
@@ -360,6 +360,7 @@ void Game::spawn_enemy()
 		big_enemy->collision_radius = std::make_shared<Ccollision>(be_radius+be_thickness);
 		big_enemy->life = std::make_shared<Clife>();
 		big_enemy->life->set_health(3+(big_e_spawn_interval/5));
+		big_e_spawn_sound->sound.play();
 	}
 }
 
@@ -508,6 +509,7 @@ void Game::collision()
 					score += 5;
 					b->destroy();
 					e->destroy();
+					collision_sound->sound.play();
 				}
 			}
 		}
@@ -525,6 +527,7 @@ void Game::collision()
 						be->destroy();
 					}
 					b->destroy();
+					collision_sound->sound.play();
 				}
 			}
 		}
