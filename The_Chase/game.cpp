@@ -466,6 +466,7 @@ void Game::collision()
 					p_e_collision_count++;
 					p->transform->pos = { w_width/2,w_height/2 };
 					e->destroy();
+					player_dead_sound->sound.play();
 				}
 			}
 		}
@@ -482,10 +483,11 @@ void Game::collision()
 					{
 						score += 10;
 						be->destroy();
+						big_e_dead_sound->sound.play();
 					}
 					
 					p->transform->pos = { p->collision_radius->radius,p->collision_radius->radius };
-
+					player_dead_sound->sound.play();
 				}
 
 			}
@@ -525,6 +527,7 @@ void Game::collision()
 					{
 						score+=10;
 						be->destroy();
+						big_e_dead_sound->sound.play();
 					}
 					b->destroy();
 					collision_sound->sound.play();
