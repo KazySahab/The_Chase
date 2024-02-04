@@ -1,11 +1,23 @@
 #include "main_menu.h"
 Main_menu::Main_menu()
-	:menu_window(sf::VideoMode(w_width, w_height), "Main Menu")
+	:
+	
+	menu_window(sf::VideoMode(w_width, w_height), "Main Menu")
+	
+	
 {
 	if (!font.loadFromFile("font/h_ghost.ttf"))
 	{
 		std::cout << "Failed to load Font" << std::endl;
 	}
+	if (!menu_bg_image.loadFromFile("images/background_image.jpg"))
+	{
+		std::cout << "background Load failed";
+	}
+
+	menu_background.setSize(sf::Vector2f(w_width, w_height));
+	menu_background.setTexture(&menu_bg_image);
+
 	for (int i = 0; i < n_options; i++)
 	{
 		main_menu_selection[i].setFont(font);
@@ -67,22 +79,18 @@ void Main_menu::run()
 					switch (selected)
 					{
 					case 0:
-						
-						menu_bg_sound->sound.stop();
+
+						menu_bg_sound->sound.setVolume(0);
 						is_play_triggerred = true;
-						menu_window.close();
-						
+
 						break;
 					case 1:
-						std::cout << "Options Triggered";
+						is_instruction_triggerrred = true;
 						break;
 
 					case 2:
-						load_menu_high_score();
-						menu_h_score_text->write.setString("HIGH SCORE : " + std::to_string(menu_high_score));
-						menu_h_score_text->write.setCharacterSize(35);
-						std::cout << "yes written" << std::endl;
-						menu_window.draw(menu_h_score_text->write);
+						is_high_score_triggerred = true;
+
 						break;
 					case 3:
 						menu_window.close();
@@ -91,10 +99,63 @@ void Main_menu::run()
 				}
 
 				}
+
+			}
+
+			if (sf::Joystick::isConnected(0))
+			{
+				if (event.type == sf::Event::JoystickMoved)
+				{
+					float j_move_y = sf::Joystick::getAxisPosition(0, sf::Joystick::Y);
+					if (j_move_y == 100)
+					{
+						main_menu_selection[selected].setFillColor(sf::Color::White);
+						select_counter++;
+						selected = select_counter % n_options;
+						main_menu_selection[selected].setFillColor(sf::Color::Red);
+					}
+					if (j_move_y == -100)
+					{
+						main_menu_selection[selected].setFillColor(sf::Color::White);
+						select_counter--;
+						if (select_counter < 0) select_counter = 3;
+						selected = select_counter % n_options;
+						main_menu_selection[selected].setFillColor(sf::Color::Red);
+					}
+				}
+				if (event.type == sf::Event::JoystickButtonPressed)
+				{
+					if (sf::Joystick::isButtonPressed(0, 0))
+					{
+						switch (selected)
+						{
+						case 0:
+
+							menu_bg_sound->sound.setVolume(0);
+							is_play_triggerred = true;
+
+							break;
+						case 1:
+							is_instruction_triggerrred = true;
+							break;
+
+						case 2:
+							is_high_score_triggerred = true;
+
+							break;
+						case 3:
+							menu_window.close();
+							break;
+						}
+					}
+				}
 			}
 		}
+		load_scene();
 		menu_window.clear(sf::Color::Black);
+		menu_window.draw(menu_background);
 		draw_menu();
+		
 		menu_window.display();
 	}
 
@@ -112,5 +173,89 @@ void Main_menu::load_menu_high_score()
 	else
 	{
 		std::cout << "cant open";
+	}
+}
+
+void Main_menu::load_scene()
+{
+	if (is_play_triggerred)
+	{
+		Game game;
+		game.run();
+		menu_bg_sound->sound.setVolume(30);
+		is_play_triggerred = false;
+	}
+	if (is_high_score_triggerred)
+	{
+		if (!menu_bg_image.loadFromFile("images/background_image.jpg"))
+		{
+			std::cout << "background Load failed";
+		}
+
+		menu_background.setSize(sf::Vector2f(w_width, w_height));
+		menu_background.setTexture(&menu_bg_image);
+		while (menu_window.isOpen())
+		{
+			sf::Event hs_event;
+			while (menu_window.pollEvent(hs_event))
+			{
+				if (hs_event.type == sf::Event::Closed)
+					menu_window.close();
+			}
+
+			if (sf::Joystick::isButtonPressed(0, 7) || sf::Joystick::isButtonPressed(0, 5))
+			{
+				is_high_score_triggerred = false;
+				break;
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+			{
+				is_high_score_triggerred = false;
+				break;
+
+			}
+			load_menu_high_score();
+			menu_window.clear(sf::Color::Black);
+			menu_window.draw(menu_background);
+			menu_h_score_text->write.setString("HIGH SCORE : " + std::to_string(menu_high_score));
+			menu_h_score_text->write.setCharacterSize(35);
+			menu_window.draw(menu_h_score_text->write);
+			menu_window.display();
+		}
+	}
+	if (is_instruction_triggerrred)
+	{
+		if (!menu_bg_image.loadFromFile("images/background_image.jpg"))
+		{
+			std::cout << "background Load failed";
+		}
+
+		menu_background.setSize(sf::Vector2f(w_width, w_height));
+		menu_background.setTexture(&menu_bg_image);
+		while (menu_window.isOpen())
+		{
+			sf::Event inst_event;
+			while (menu_window.pollEvent(inst_event))
+			{
+				if (inst_event.type == sf::Event::Closed)
+					menu_window.close();
+			}
+
+			if (sf::Joystick::isButtonPressed(0, 7) || sf::Joystick::isButtonPressed(0, 5))
+			{
+				is_instruction_triggerrred = false;
+				break;
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+			{
+				is_instruction_triggerrred = false;
+				break;
+
+			}
+			menu_window.clear(sf::Color::Black);
+			menu_window.draw(menu_background);
+			menu_window.display();
+		}
+
 	}
 }

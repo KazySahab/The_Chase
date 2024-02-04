@@ -23,7 +23,7 @@ void Game::run()
 		background_sound_1->sound.play();
 		background_sound_2->sound.play();
 
-		while (!is_game_exit)
+		while (window.isOpen())
 		{
 
 			sf::Time frame_time = delta_clock.restart();
@@ -71,13 +71,15 @@ void Game::run()
 			save_high_score();
 			m_current_frame++;
 
+			if (is_game_exit)
+			{
+				background_sound_1->sound.stop();
+				background_sound_2->sound.stop();
+				break;
+			}
 
 		}
-		if (is_game_exit)
-		{
-			background_sound_1->sound.stop();
-			background_sound_2->sound.stop();
-		}
+		
 	
 }
 
@@ -225,6 +227,18 @@ void Game::handle_input()
 				{
 					spawn_bullet(player, Vec2(player->transform->pos.x, player->transform->pos.y - 100));
 				}
+				else if (sf::Joystick::isButtonPressed(0, 6) || sf::Joystick::isButtonPressed(0, 4))
+				{
+					if (game_pause_counter % 2 == 0) this->is_game_paused = true;
+					else this->is_game_paused = false;
+					game_pause_counter++;
+					break;
+				}
+				else if (sf::Joystick::isButtonPressed(0, 7)|| sf::Joystick::isButtonPressed(0, 5))
+				{
+					is_game_exit = true;
+				}
+
 
 				if (bullet_no > 0)
 				{

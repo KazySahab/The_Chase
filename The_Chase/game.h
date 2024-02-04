@@ -4,7 +4,6 @@
 #include "fstream"
 #include "sound.h"
 #include"text.h"
-
 #include"global_function.h"
 
 
