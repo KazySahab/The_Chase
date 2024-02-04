@@ -1,6 +1,5 @@
-
+// entity
 #include "entity.h"
-
 
 bool Entity::is_active() const
 {
