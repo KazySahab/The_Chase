@@ -1,16 +1,17 @@
 #include <SFML/Graphics.hpp>
 #include "iostream"
 #include "game.h"
+#include "main_menu.h"
 
 int main()
 {
-    try {
+    
+    std::shared_ptr<Main_menu> main_menu = std::make_shared<Main_menu>();
+    main_menu->run();
+    if (main_menu->is_play_triggerred)
+    {
         Game game;
         game.run();
-    }
-    catch (const std::exception& e) {
-        std::cerr << "Exception caught in main: " << e.what() << std::endl;
-        return EXIT_FAILURE;
     }
     return 0;
 }

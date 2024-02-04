@@ -12,7 +12,7 @@ public:
 	{
 		if (!font.loadFromFile("font/h_ghost.ttf"))
 		{
-			throw std::runtime_error("Failed to load font.");
+			std::cout << "Failed to load Font" << std::endl;
 		}
 		write.setFont(font);
 		write.setCharacterSize(24);
