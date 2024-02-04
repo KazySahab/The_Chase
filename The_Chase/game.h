@@ -11,7 +11,7 @@
 class Game
 {
 private:
-	sf::RenderWindow window;
+	//sf::RenderWindow window;
 	sf::Event event;
 	sf::Texture background_image;
 	sf::RectangleShape background;
@@ -35,8 +35,8 @@ private:
 	float e_spawn_interval = 3.5f;
 	
 	void move_entity();
-	void handle_input();
-	void render();
+	void handle_input(sf::RenderWindow& window);
+	void render(sf::RenderWindow& window);
 	void collision();
 	void check_bullet_health();
 	void spawn_enemy();
@@ -48,8 +48,6 @@ private:
 
 	bool is_game_paused = false;
 	bool is_game_exit = false;
-
-	
 
 	std::shared_ptr<Sound> background_sound_1 = std::make_shared<Sound>("background_1", true, 25);
 	std::shared_ptr<Sound> background_sound_2 = std::make_shared<Sound>("background_2", true, 35);
@@ -67,7 +65,7 @@ private:
 public:
 	
 	Game();
-	void run();
+	void run(sf::RenderWindow& window);
 	~Game() {};
 };
 

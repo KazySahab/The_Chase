@@ -4,7 +4,7 @@
 int game_pause_counter = 0;
 
 Game::Game()
-	:window(sf::VideoMode(w_width, w_height), "The Chase")
+	
 {
 	if (!background_image.loadFromFile("images/background_image.jpg"))
 	{
@@ -17,8 +17,10 @@ Game::Game()
 }
 
 
-void Game::run()
+void Game::run(sf::RenderWindow &window)
 {
+
+		window.setTitle("The Chase");
 		spawn_player();
 		background_sound_1->sound.play();
 		background_sound_2->sound.play();
@@ -28,19 +30,9 @@ void Game::run()
 
 			sf::Time frame_time = delta_clock.restart();
 			delta_time = frame_time.asSeconds();
-			handle_input();
+			handle_input(window);
 			m_entities.update();
-			if (e_spawn_time.getElapsedTime().asSeconds() > e_spawn_interval)
-			{
-				big_e_spawn_interval++;
-				spawn_enemy();
-				e_spawn_time.restart();
-			}
-			if (bullet_time.getElapsedTime().asSeconds() > 30)
-			{
-				bullet_no += 30;
-				bullet_time.restart();
-			}
+			
 			score_text->write.setString(" High Score : " + std::to_string(high_score) + "\n Score : " + std::to_string(score));
 			rem_life_text->write.setString(" Life :" + std::to_string(3 - p_e_collision_count));
 			bullet_reload_time->write.setString("Reload Time (30s) : " + std::to_string((int)bullet_time.getElapsedTime().asSeconds()));
@@ -50,7 +42,18 @@ void Game::run()
 			{
 				move_entity();
 				collision();
-				render();
+				render(window);
+				if (e_spawn_time.getElapsedTime().asSeconds() > e_spawn_interval)
+				{
+					big_e_spawn_interval++;
+					spawn_enemy();
+					e_spawn_time.restart();
+				}
+				if (bullet_time.getElapsedTime().asSeconds() > 30)
+				{
+					bullet_no += 30;
+					bullet_time.restart();
+				}
 				if (background_sound_1->is_paused && background_sound_2->is_paused)
 				{
 					background_sound_1->sound.play();
@@ -65,6 +68,11 @@ void Game::run()
 				background_sound_1->is_paused = true;
 				background_sound_2->sound.pause();
 				background_sound_2->is_paused = true;
+			}
+			if (p_e_collision_count > 2)
+			{
+				sf::sleep(sf::seconds(3));
+				window.close();
 			}
 
 			check_bullet_health();
@@ -83,7 +91,7 @@ void Game::run()
 	
 }
 
-void Game::handle_input()
+void Game::handle_input(sf::RenderWindow& window)
 {
 
 	while (window.pollEvent(event)) {
@@ -254,28 +262,31 @@ void Game::move_entity()
 	player->transform->velocity = { 0,0 };
 	if (player->input->up)
 	{
-		player->transform->velocity.y = -350 * delta_time;
+		player->transform->velocity.y = -350 ;
 	}
 	if (player->input->down)
 	{
-		player->transform->velocity.y = 350 * delta_time;
+		player->transform->velocity.y = 350 ;
 	}
 	if (player->input->right)
 	{
-		player->transform->velocity.x = 350 * delta_time;
+		player->transform->velocity.x = 350 ;
 	}
 	if (player->input->left)
 	{
-		player->transform->velocity.x = -350 * delta_time;
+		player->transform->velocity.x = -350 ;
 	}
 
-	player->transform->pos += player->transform->velocity;
+	player->transform->pos.x += player->transform->velocity.x*delta_time;
+	player->transform->pos.y += player->transform->velocity.y * delta_time;
 	player->shape->circle.setPosition(player->transform->pos.x, player->transform->pos.y);
 	player->shape->circle.rotate(player->transform->angle * delta_time);
 
 	for (auto& e : m_entities.get_entities("enemies"))
 	{
-		e->transform->pos += e->transform->velocity;
+		
+		e->transform->pos.x += e->transform->velocity.x * delta_time;
+		e->transform->pos.y += e->transform->velocity.y * delta_time;
 		e->shape->circle.setPosition(e->transform->pos.x, e->transform->pos.y);
 		e->shape->circle.rotate(e->transform->angle * delta_time);
 	}
@@ -306,7 +317,7 @@ void Game::move_entity()
 
 }
 
-void Game::render()
+void Game::render(sf::RenderWindow& window)
 {
 	window.clear();;
 	window.draw(background);
@@ -349,7 +360,7 @@ void Game::spawn_enemy()
 	enemy->shape = std::make_shared<Cshape>(e_radius,sf::Color::Black,e_thickness);
 	enemy->shape->load_character(get_enemy_image());
 	enemy->collision_radius = std::make_shared<Ccollision>(e_radius + e_thickness);
-	enemy->transform->velocity *= delta_time;
+
 
 	//Big_Enemy
 	if (big_e_spawn_interval % 5==0)
@@ -506,11 +517,7 @@ void Game::collision()
 
 			}
 		}
-		if (p_e_collision_count > 2)
-		{
-			sf::sleep(sf::seconds(3));
-			window.close();
-		}
+		
 	}
 
 	for (auto& b : m_entities.get_entities("bullets"))
