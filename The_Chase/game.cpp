@@ -1,8 +1,5 @@
 #include "game.h"
-
-
-
-
+#include "global_function.h"
 
 int game_pause_counter = 0;
 
@@ -22,15 +19,15 @@ Game::Game()
 
 void Game::run()
 {
-	spawn_player();
-	background_sound_1->sound.play();
-	background_sound_2->sound.play();
-	
-	while (!is_game_exit)
-	{
-		sf::Time frame_time = delta_clock.restart();
-		delta_time = frame_time.asSeconds();
+		spawn_player();
+		background_sound_1->sound.play();
+		background_sound_2->sound.play();
 
+		while (!is_game_exit)
+		{
+
+			sf::Time frame_time = delta_clock.restart();
+			delta_time = frame_time.asSeconds();
 			handle_input();
 			m_entities.update();
 			if (e_spawn_time.getElapsedTime().asSeconds() > e_spawn_interval)
@@ -48,7 +45,7 @@ void Game::run()
 			rem_life_text->write.setString(" Life :" + std::to_string(3 - p_e_collision_count));
 			bullet_reload_time->write.setString("Reload Time (30s) : " + std::to_string((int)bullet_time.getElapsedTime().asSeconds()));
 			bullet_num->write.setString("Remaining Bullets : " + std::to_string(bullet_no));
-			
+
 			if (!is_game_paused)
 			{
 				move_entity();
@@ -57,7 +54,7 @@ void Game::run()
 				if (background_sound_1->is_paused && background_sound_2->is_paused)
 				{
 					background_sound_1->sound.play();
-					background_sound_1->is_paused=false;
+					background_sound_1->is_paused = false;
 					background_sound_2->sound.play();
 					background_sound_2->is_paused = false;
 				}
@@ -69,18 +66,19 @@ void Game::run()
 				background_sound_2->sound.pause();
 				background_sound_2->is_paused = true;
 			}
-			
+
 			check_bullet_health();
 			save_high_score();
 			m_current_frame++;
 
-		
-	}
-	if (is_game_exit)
-	{
-		background_sound_1->sound.stop();
-		background_sound_2->sound.stop();
-	}
+
+		}
+		if (is_game_exit)
+		{
+			background_sound_1->sound.stop();
+			background_sound_2->sound.stop();
+		}
+	
 }
 
 void Game::handle_input()
@@ -547,58 +545,6 @@ void Game::check_bullet_health()
 			b->destroy();
 		}
 	}
-}
-
-std::string get_enemy_image()
-{
-	int e_choose = (int)get_random(1, 6);
-	
-	switch (e_choose)
-	{
-		case 1:
-			return "enemy1";
-			break;
-		case 2:
-			return "enemy2";
-			break;
-		case 3:
-			return "enemy3";
-			break;
-		case 4:
-			return "enemy4";
-			break;
-		case 5:
-			return "enemy5";
-			break;
-	}
-}
-
-std::string get_big_e_spawn_sound()
-{
-	int be_choose = (int)get_random(1, 5);
-	std::cout << be_choose << std::endl;
-	switch (be_choose)
-	{
-	case 1:
-		return "big_e_spawn1";
-		break;
-	case 2:
-		return "big_e_spawn2";
-		break;
-	case 3:
-		return "big_e_spawn3";
-		break;
-	case 4:
-		return "big_e_spawn4";
-		break;
-	}
-}
-
-float get_random(float min, float max) {
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<float> dis(min, max);
-	return dis(gen);
 }
 
 void Game::load_high_score()

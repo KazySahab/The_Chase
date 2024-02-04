@@ -1,16 +1,13 @@
 #pragma once
-#include "random"
+
 #include "entity_manager.h"
 #include "fstream"
 #include "sound.h"
 #include"text.h"
 
-const float w_width = sf::VideoMode::getDesktopMode().width;
-const float w_height = sf::VideoMode::getDesktopMode().height;
+#include"global_function.h"
 
-float get_random(float min, float max);
-std::string get_big_e_spawn_sound();
-std::string get_enemy_image();
+
 
 class Game
 {
@@ -36,7 +33,7 @@ private:
 	int big_e_spawn_interval = 0;
 
 	float delta_time = 0;
-	float e_spawn_interval = 3.0f;
+	float e_spawn_interval = 3.5f;
 	
 	void move_entity();
 	void handle_input();
@@ -53,6 +50,8 @@ private:
 	bool is_game_paused = false;
 	bool is_game_exit = false;
 
+	
+
 	std::shared_ptr<Sound> background_sound_1 = std::make_shared<Sound>("background_1", true, 25);
 	std::shared_ptr<Sound> background_sound_2 = std::make_shared<Sound>("background_2", true, 35);
 	std::shared_ptr<Sound> bullet_sound = std::make_shared<Sound>("bullet", false, 50);
@@ -67,6 +66,7 @@ private:
 	std::shared_ptr<Show_text> bullet_reload_time = std::make_shared<Show_text>(sf::Vector2f(w_width - 300, 50));
 
 public:
+	
 	Game();
 	void run();
 	~Game() {};
