@@ -19,6 +19,7 @@ private:
 	sf::Clock bullet_time;
 	sf::Clock delta_clock;
 	sf::Clock life_span;
+	sf::Clock p_special_power_time;
 
 	Entity_manager m_entities;
 	std::shared_ptr<Entity> player;
@@ -30,6 +31,7 @@ private:
 	int p_e_collision_count = 0;
 	int show_bg_image_counter = 0;
 	int big_e_spawn_interval = 0;
+	float remaining_p_special_power=0;
 
 	float delta_time = 0;
 	float e_spawn_interval = 3.5f;
@@ -42,7 +44,8 @@ private:
 	void spawn_enemy();
 	void spawn_player();
 	void spawn_bullet(std::shared_ptr<Entity>player, const Vec2& target);
-	
+	void load_special_power();
+
 	void load_high_score();
 	void save_high_score();
 
@@ -65,6 +68,7 @@ private:
 	std::shared_ptr<Show_text> bullet_reload_time_text = std::make_shared<Show_text>(sf::Vector2f(w_width - 300, 50));
 	std::shared_ptr<Show_text> difficulty_level_text = std::make_shared<Show_text>(sf::Vector2f(w_width / 2-100, 10));
 	std::shared_ptr<Show_text> game_over_text = std::make_shared<Show_text>(sf::Vector2f(w_width / 2-80, w_height / 2));
+	std::shared_ptr<Show_text> p_special_power_text = std::make_shared<Show_text>(sf::Vector2f(w_width / 2 - 80, 20));
 
 public:
 	

@@ -4,7 +4,6 @@
 int game_pause_counter = 0;
 
 Game::Game()
-	
 {
 	show_bg_image_counter++;
 	if (!background_image.loadFromFile("images/background_image.jpg"))
@@ -35,15 +34,13 @@ void Game::run(sf::RenderWindow &window)
 			delta_time = frame_time.asSeconds();
 			handle_input(window);
 			m_entities.update();
-			
 			score_text->write.setString(" High Score : " + std::to_string(high_score) + "\n Score : " + std::to_string(score));
 			rem_life_text->write.setString(" Life :" + std::to_string(3 - p_e_collision_count));
-			bullet_reload_time_text->write.setString("Reload Time (30s) : " + std::to_string((int)bullet_time.getElapsedTime().asSeconds()));
+			bullet_reload_time_text->write.setString("Reload Time (30s) : " + std::to_string((int)bullet_time.getElapsedTime().asSeconds()) + "\n Special Power : " + std::to_string((int)remaining_p_special_power));
 			bullet_num_text->write.setString("Remaining Bullets : " + std::to_string(bullet_no));
 
 			if (!is_game_paused)
 			{
-				
 				move_entity();
 				collision();
 				render(window);
@@ -56,8 +53,9 @@ void Game::run(sf::RenderWindow &window)
 				if (bullet_time.getElapsedTime().asSeconds() > 30)
 				{
 					bullet_no += 30;
+					remaining_p_special_power+=0.5;
+					std::cout << remaining_p_special_power << std::endl;
 					bullet_time.restart();
-					
 				}
 				if (background_sound_1->is_paused && background_sound_2->is_paused)
 				{
@@ -75,7 +73,7 @@ void Game::run(sf::RenderWindow &window)
 				background_sound_2->sound.pause();
 				background_sound_2->is_paused = true;
 			}
-
+			load_special_power();
 			change_level_bg_image();
 			check_bullet_health();
 			save_high_score();
@@ -169,6 +167,19 @@ void Game::handle_input(sf::RenderWindow& window)
 				{
 					bullet_no -= 1;
 				}
+			}
+			if (event.mouseButton.button == sf::Mouse::Right)
+			{
+				if (remaining_p_special_power > 0)
+				{
+				
+					player->shape->circle.setFillColor(sf::Color::Red);
+					p_special_power_time.restart();
+					player->input->special_weapon = true;
+					remaining_p_special_power--;
+					
+				}
+				
 			}
 		}
 
@@ -444,6 +455,7 @@ void Game::spawn_player()
 	entity->input = std::make_shared<Cinput>();
 	entity->shape->load_character("player");
 	entity->collision_radius = std::make_shared<Ccollision>(p_radius + p_thickness);
+	//entity->life = std::make_shared<Clife>(1000, m_current_frame);
 	player = entity;
 }
 
@@ -488,48 +500,51 @@ void Game::collision()
 			p->transform->pos.y = p->collision_radius->radius;
 		}
 	}
-
-	for (auto& p : m_entities.get_entities("player"))
+	if (!player->input->special_weapon)
 	{
-		for (auto& e : m_entities.get_entities("enemies"))
+		for (auto& p : m_entities.get_entities("player"))
 		{
-			if (p->is_active() && e->is_active())
+			for (auto& e : m_entities.get_entities("enemies"))
 			{
-				float dist = p->transform->pos.dist(e->transform->pos);
-				if (dist < p->collision_radius->radius + e->collision_radius->radius)
+				if (p->is_active() && e->is_active())
 				{
-					p_e_collision_count++;
-					p->transform->pos = { w_width/2,w_height/2 };
-					e->destroy();
-					player_dead_sound->sound.play();
-				}
-			}
-		}
-		for (auto& be : m_entities.get_entities("big_enemies"))
-		{
-			if (be->is_active() && p->is_active())
-			{
-				float dist = p->transform->pos.dist(be->transform->pos);
-				if (dist < p->collision_radius->radius + be->collision_radius->radius)
-				{
-					be->life->health--;
-					p_e_collision_count++;
-					if (be->life->health < 1)
+					float dist = p->transform->pos.dist(e->transform->pos);
+					if (dist < p->collision_radius->radius + e->collision_radius->radius)
 					{
-						score += 10;
-						
-						be->destroy();
-						big_e_dead_sound->sound.play();
+						p_e_collision_count++;
+						p->transform->pos = { w_width / 2,w_height / 2 };
+						e->destroy();
+						player_dead_sound->sound.play();
 					}
-					
-					p->transform->pos = { w_width / 2,w_height / 2 };
-					player_dead_sound->sound.play();
 				}
-
 			}
+			for (auto& be : m_entities.get_entities("big_enemies"))
+			{
+				if (be->is_active() && p->is_active())
+				{
+					float dist = p->transform->pos.dist(be->transform->pos);
+					if (dist < p->collision_radius->radius + be->collision_radius->radius)
+					{
+						be->life->health--;
+						p_e_collision_count++;
+						if (be->life->health < 1)
+						{
+							score += 10;
+
+							be->destroy();
+							big_e_dead_sound->sound.play();
+						}
+
+						p->transform->pos = { w_width / 2,w_height / 2 };
+						player_dead_sound->sound.play();
+					}
+
+				}
+			}
+
 		}
-		
 	}
+	
 
 	for (auto& b : m_entities.get_entities("bullets"))
 	{
@@ -568,6 +583,7 @@ void Game::collision()
 			}
 		}
 	}
+	
 	if (p_e_collision_count > 2)
 	{
 		is_game_exit = true;
@@ -664,4 +680,17 @@ void Game::change_level_bg_image()
 		
 	}
 	
+}
+void Game:: load_special_power()
+{
+	if (player->input->special_weapon)
+	{
+		if (p_special_power_time.getElapsedTime().asSeconds()>5)
+		{
+			player->input->special_weapon = false;
+			player->shape->circle.setFillColor(sf::Color::White);
+			player->shape->load_character("player");
+			
+		}
+	}
 }
