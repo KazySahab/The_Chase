@@ -9,7 +9,7 @@ float get_random(float min, float max) {
 
 std::string get_big_e_spawn_sound()
 {
-	int be_choose = (int)get_random(1, 4);
+	int be_choose = (int)get_random(1, 5);
 	switch (be_choose)
 	{
 	case 1:
@@ -20,6 +20,10 @@ std::string get_big_e_spawn_sound()
 		break;
 	case 3:
 		return "big_e_spawn3";
+		break;
+	
+	case 4:
+		return "big_e_spawn4";
 		break;
 	}
 }

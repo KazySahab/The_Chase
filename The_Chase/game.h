@@ -11,7 +11,6 @@
 class Game
 {
 private:
-	//sf::RenderWindow window;
 	sf::Event event;
 	sf::Texture background_image;
 	sf::RectangleShape background;
@@ -25,7 +24,7 @@ private:
 	std::shared_ptr<Entity> player;
 	
 	int m_current_frame = 0;
-	int bullet_no = 40;
+	int bullet_no = 30;
 	int score = 0;
 	int high_score = 0;
 	int p_e_collision_count = 0;
@@ -65,6 +64,7 @@ private:
 	std::shared_ptr<Show_text> bullet_num_text = std::make_shared<Show_text>(sf::Vector2f(w_width - 300, 10));
 	std::shared_ptr<Show_text> bullet_reload_time_text = std::make_shared<Show_text>(sf::Vector2f(w_width - 300, 50));
 	std::shared_ptr<Show_text> difficulty_level_text = std::make_shared<Show_text>(sf::Vector2f(w_width / 2-100, 10));
+	std::shared_ptr<Show_text> game_over_text = std::make_shared<Show_text>(sf::Vector2f(w_width / 2-80, w_height / 2));
 
 public:
 	

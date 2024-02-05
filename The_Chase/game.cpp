@@ -14,6 +14,8 @@ Game::Game()
 	background.setSize(sf::Vector2f(w_width, w_height));
 	background.setTexture(&background_image);
 	difficulty_level_text->write.setString("Level : Beginner");
+	game_over_text->write.setString("GAME OVER!");
+	game_over_text->write.setCharacterSize(35);
 	load_high_score();
 }
 
@@ -41,6 +43,7 @@ void Game::run(sf::RenderWindow &window)
 
 			if (!is_game_paused)
 			{
+				
 				move_entity();
 				collision();
 				render(window);
@@ -54,6 +57,7 @@ void Game::run(sf::RenderWindow &window)
 				{
 					bullet_no += 30;
 					bullet_time.restart();
+					
 				}
 				if (background_sound_1->is_paused && background_sound_2->is_paused)
 				{
@@ -65,17 +69,13 @@ void Game::run(sf::RenderWindow &window)
 			}
 			if (is_game_paused)
 			{
+				bullet_time.restart();
 				background_sound_1->sound.pause();
 				background_sound_1->is_paused = true;
 				background_sound_2->sound.pause();
 				background_sound_2->is_paused = true;
 			}
-			if (p_e_collision_count > 2)
-			{
-				sf::sleep(sf::seconds(3));
-				window.close();
-			}
-			
+
 			change_level_bg_image();
 			check_bullet_health();
 			save_high_score();
@@ -85,6 +85,7 @@ void Game::run(sf::RenderWindow &window)
 			{
 				background_sound_1->sound.stop();
 				background_sound_2->sound.stop();
+				sf::sleep(sf::seconds(4));
 				break;
 			}
 
@@ -336,12 +337,17 @@ void Game::render(sf::RenderWindow& window)
 	{
 		window.draw(b->shape->circle);
 	}
+	if (p_e_collision_count > 2)
+	{
+		window.draw(game_over_text->write);
+		
+	}
 	window.draw(score_text->write);
 	window.draw(rem_life_text->write);
 	window.draw(bullet_num_text->write);
 	window.draw(bullet_reload_time_text->write);
 	window.draw(difficulty_level_text->write);
-
+	
 	window.display();
 }
 
@@ -516,7 +522,7 @@ void Game::collision()
 						big_e_dead_sound->sound.play();
 					}
 					
-					p->transform->pos = { p->collision_radius->radius,p->collision_radius->radius };
+					p->transform->pos = { w_width / 2,w_height / 2 };
 					player_dead_sound->sound.play();
 				}
 
@@ -562,6 +568,11 @@ void Game::collision()
 			}
 		}
 	}
+	if (p_e_collision_count > 2)
+	{
+		is_game_exit = true;
+	}
+
 }
 void Game::check_bullet_health()
 {
