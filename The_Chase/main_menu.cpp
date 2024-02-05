@@ -64,6 +64,7 @@ void Main_menu::run()
 					select_counter++;
 					selected = select_counter % n_options;
 					main_menu_selection[selected].setFillColor(sf::Color::Red);
+					menu_scroll->sound.play();
 					break;
 				}
 
@@ -74,6 +75,7 @@ void Main_menu::run()
 					if (select_counter < 0) select_counter = n_options-1;
 					selected = select_counter % n_options;
 					main_menu_selection[selected].setFillColor(sf::Color::Red);
+					menu_scroll->sound.play();
 					break;
 				}
 				case sf::Keyboard::Enter:
@@ -84,18 +86,23 @@ void Main_menu::run()
 
 						menu_bg_sound->sound.setVolume(0);
 						scary_welcome->sound.stop();
+						menu_select->sound.play();
 						is_play_triggerred = true;
 						break;
 					case 1:
+						menu_select->sound.play();
 						is_instruction_triggerrred = true;
 						break;
 					case 2:
+						menu_select->sound.play();
 						is_high_score_triggerred = true;
 						break;
 					case 3:
+						menu_select->sound.play();
 						is_about_us_triggerred = true;
 						break;
 					case 4:
+						menu_select->sound.play();
 						window.close();
 						break;
 					}
@@ -116,14 +123,16 @@ void Main_menu::run()
 						select_counter++;
 						selected = select_counter % n_options;
 						main_menu_selection[selected].setFillColor(sf::Color::Red);
+						menu_scroll->sound.play();
 					}
-					if (j_move_y == -100)
+					else if (j_move_y == -100)
 					{
 						main_menu_selection[selected].setFillColor(sf::Color::White);
 						select_counter--;
 						if (select_counter < 0) select_counter = n_options-1;
 						selected = select_counter % n_options;
 						main_menu_selection[selected].setFillColor(sf::Color::Red);
+						menu_scroll->sound.play();
 					}
 				}
 				if (event.type == sf::Event::JoystickButtonPressed)
@@ -134,18 +143,23 @@ void Main_menu::run()
 						{
 						case 0:
 							menu_bg_sound->sound.setVolume(0);
+							menu_select->sound.play();
 							is_play_triggerred = true;
 							break;
 						case 1:
+							menu_select->sound.play();
 							is_instruction_triggerrred = true;
 							break;
 						case 2:
+							menu_select->sound.play();
 							is_high_score_triggerred = true;
 							break;
 						case 3:
+							menu_select->sound.play();
 							is_about_us_triggerred = true;
 							break;
 						case 4:
+							menu_select->sound.play();
 							window.close();
 							break;
 						}
@@ -203,16 +217,18 @@ void Main_menu::load_scene()
 					window.close();
 			}
 
-			if (sf::Joystick::isButtonPressed(0, 7) || sf::Joystick::isButtonPressed(0, 5))
+			if (sf::Joystick::isButtonPressed(0, 6) || sf::Joystick::isButtonPressed(0, 4))
 			{
 				is_high_score_triggerred = false;
 				window.setTitle("Main Menu");
+				menu_select->sound.play();
 				break;
 			}
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
 			{
 				is_high_score_triggerred = false;
 				window.setTitle("Main Menu");
+				menu_select->sound.play();
 				break;
 
 			}
@@ -228,22 +244,21 @@ void Main_menu::load_scene()
 
 	if (is_instruction_triggerrred)
 	{
-		sf::Texture instruction_image;
-		sf::RectangleShape instruction_block;
+		std::shared_ptr<Show_text>instruction_keyboard = std::make_shared<Show_text>(sf::Vector2f(w_width/2-200, 100));
+		std::shared_ptr<Show_text>instruction_joystick = std::make_shared<Show_text>(sf::Vector2f(w_width /2-200, w_height/2+100));
 		if (!menu_bg_image.loadFromFile("images/background_image.jpg"))
 		{
 			std::cout << "background Load failed";
 		}
-		if (!instruction_image.loadFromFile("images/instruction1.png"))
-		{
-			std::cout << "Failed to load instruction";
-		}
 		menu_background.setSize(sf::Vector2f(w_width, w_height));
 		menu_background.setTexture(&menu_bg_image);
-		instruction_block.setSize(sf::Vector2f(w_width,w_height));
-		
-		instruction_block.setTexture(&instruction_image);
 		window.setTitle("Instructions");
+		instruction_keyboard->write.setString("----KEYBOARD---- \n\n W - Up \n A - Left \n S - Down \n D - Right \n P - Play/Pause \n Esc - Back/Exit \n Left Click - Fire/Shoot");
+		instruction_keyboard->write.setLetterSpacing(2);
+		instruction_keyboard->write.setCharacterSize(30);
+		instruction_joystick->write.setString("\t----JOYSTICK---- \n\n Left Analog - Move Player \n Right Buttons (X,Y,A,B) - Fire/Shoot \n Start/RT - Pause Game \n Back/LT - Back/Exit ");
+		instruction_joystick->write.setLetterSpacing(2);
+		instruction_joystick->write.setCharacterSize(30);
 		while (window.isOpen())
 		{
 			sf::Event inst_event;
@@ -253,22 +268,25 @@ void Main_menu::load_scene()
 					window.close();
 			}
 
-			if (sf::Joystick::isButtonPressed(0, 7) || sf::Joystick::isButtonPressed(0, 5))
+			if (sf::Joystick::isButtonPressed(0, 6) || sf::Joystick::isButtonPressed(0, 4))
 			{
 				is_instruction_triggerrred = false;
 				window.setTitle("Main Menu");
+				menu_select->sound.play();
 				break;
 			}
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
 			{
 				is_instruction_triggerrred = false;
 				window.setTitle("Main Menu");
+				menu_select->sound.play();
 				break;
 
 			}
 			window.clear(sf::Color::Black);
 			window.draw(menu_background);
-			window.draw(instruction_block);
+			window.draw(instruction_keyboard->write);
+			window.draw(instruction_joystick->write);
 			window.display();
 		}
 
@@ -293,16 +311,18 @@ void Main_menu::load_scene()
 					window.close();
 			}
 
-			if (sf::Joystick::isButtonPressed(0, 7) || sf::Joystick::isButtonPressed(0, 5))
+			if (sf::Joystick::isButtonPressed(0, 6) || sf::Joystick::isButtonPressed(0, 4))
 			{
 				is_about_us_triggerred = false;
 				window.setTitle("Main Menu");
+				menu_select->sound.play();
 				break;
 			}
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
 			{
 				is_about_us_triggerred = false;
 				window.setTitle("Main Menu");
+				menu_select->sound.play();
 				break;
 
 			}

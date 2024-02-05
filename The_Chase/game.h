@@ -25,10 +25,11 @@ private:
 	std::shared_ptr<Entity> player;
 	
 	int m_current_frame = 0;
-	int bullet_no = 30;
+	int bullet_no = 40;
 	int score = 0;
 	int high_score = 0;
 	int p_e_collision_count = 0;
+	int show_bg_image_counter = 0;
 	int big_e_spawn_interval = 0;
 
 	float delta_time = 0;
@@ -46,21 +47,24 @@ private:
 	void load_high_score();
 	void save_high_score();
 
+	void change_level_bg_image();
+
 	bool is_game_paused = false;
 	bool is_game_exit = false;
 
 	std::shared_ptr<Sound> background_sound_1 = std::make_shared<Sound>("background_1", true, 25);
-	std::shared_ptr<Sound> background_sound_2 = std::make_shared<Sound>("background_2", true, 35);
+	std::shared_ptr<Sound> background_sound_2 = std::make_shared<Sound>("background_2", true, 45);
 	std::shared_ptr<Sound> bullet_sound = std::make_shared<Sound>("bullet", false, 50);
-	std::shared_ptr<Sound> big_e_spawn_sound = std::make_shared<Sound>(false, 30);
-	std::shared_ptr<Sound> big_e_dead_sound = std::make_shared<Sound>("big_e_dead", false, 35);
+	std::shared_ptr<Sound> big_e_spawn_sound = std::make_shared<Sound>(false, 35);
+	std::shared_ptr<Sound> big_e_dead_sound = std::make_shared<Sound>("big_e_dead", false, 50);
 	std::shared_ptr<Sound> collision_sound = std::make_shared<Sound>("collision", false, 20);
-	std::shared_ptr<Sound> player_dead_sound = std::make_shared<Sound>("player_dead", false, 50);
+	std::shared_ptr<Sound> player_dead_sound = std::make_shared<Sound>("player_dead", false, 70);
 
 	std::shared_ptr<Show_text> score_text = std::make_shared<Show_text>(sf::Vector2f(30, 10));
 	std::shared_ptr<Show_text> rem_life_text = std::make_shared<Show_text>(sf::Vector2f(30, 85));
-	std::shared_ptr<Show_text> bullet_num = std::make_shared<Show_text>(sf::Vector2f(w_width - 300, 10));
-	std::shared_ptr<Show_text> bullet_reload_time = std::make_shared<Show_text>(sf::Vector2f(w_width - 300, 50));
+	std::shared_ptr<Show_text> bullet_num_text = std::make_shared<Show_text>(sf::Vector2f(w_width - 300, 10));
+	std::shared_ptr<Show_text> bullet_reload_time_text = std::make_shared<Show_text>(sf::Vector2f(w_width - 300, 50));
+	std::shared_ptr<Show_text> difficulty_level_text = std::make_shared<Show_text>(sf::Vector2f(w_width / 2-100, 10));
 
 public:
 	
