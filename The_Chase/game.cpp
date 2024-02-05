@@ -593,9 +593,5 @@ void Game::save_high_score()
 			hs_file << high_score;
 			hs_file.close();
 		}
-		else
-		{
-			std::cout << "error";
-		}
 	}
 }

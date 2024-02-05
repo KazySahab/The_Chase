@@ -234,14 +234,14 @@ void Main_menu::load_scene()
 		{
 			std::cout << "background Load failed";
 		}
-		if (!instruction_image.loadFromFile("images/instruction.png"))
+		if (!instruction_image.loadFromFile("images/instruction1.png"))
 		{
 			std::cout << "Failed to load instruction";
 		}
 		menu_background.setSize(sf::Vector2f(w_width, w_height));
 		menu_background.setTexture(&menu_bg_image);
-		instruction_block.setSize(sf::Vector2f(1000, 600));
-		instruction_block.setPosition(sf::Vector2f(500, 200));
+		instruction_block.setSize(sf::Vector2f(w_width,w_height));
+		
 		instruction_block.setTexture(&instruction_image);
 		window.setTitle("Instructions");
 		while (window.isOpen())
