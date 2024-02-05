@@ -10,7 +10,7 @@ class Main_menu
 	int select_counter = 0;
 	int selected = 0;
 	int n_options = 5;
-	int menu_high_score;
+	int menu_high_score=0;
 
 public:
 

@@ -172,10 +172,6 @@ void Main_menu::load_menu_high_score()
 		hs_file >> menu_high_score;
 		hs_file.close();
 	}
-	else
-	{
-		std::cout << "cant open";
-	}
 }
 
 void Main_menu::load_scene()
