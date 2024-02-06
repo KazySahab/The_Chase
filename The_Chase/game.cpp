@@ -52,7 +52,7 @@ void Game::run(sf::RenderWindow &window)
 				}
 				if (bullet_time.getElapsedTime().asSeconds() > 30)
 				{
-					bullet_no += 30;
+					bullet_no += 20;
 					remaining_p_special_power+=0.5;
 					std::cout << remaining_p_special_power << std::endl;
 					bullet_time.restart();
@@ -83,7 +83,7 @@ void Game::run(sf::RenderWindow &window)
 			{
 				background_sound_1->sound.stop();
 				background_sound_2->sound.stop();
-				sf::sleep(sf::seconds(4));
+				if(p_e_collision_count>2) sf::sleep(sf::seconds(3));
 				break;
 			}
 
@@ -256,9 +256,22 @@ void Game::handle_input(sf::RenderWindow& window)
 					game_pause_counter++;
 					break;
 				}
-				else if (sf::Joystick::isButtonPressed(0, 6)|| sf::Joystick::isButtonPressed(0, 4))
+				else if (sf::Joystick::isButtonPressed(0, 6))
 				{
 					is_game_exit = true;
+				}
+				else if (sf::Joystick::isButtonPressed(0, 4))
+				{
+					if (remaining_p_special_power > 0)
+					{
+
+						player->shape->circle.setFillColor(sf::Color::Red);
+						p_special_power_time.restart();
+						player->input->special_weapon = true;
+						remaining_p_special_power--;
+
+					}
+
 				}
 
 
@@ -455,7 +468,6 @@ void Game::spawn_player()
 	entity->input = std::make_shared<Cinput>();
 	entity->shape->load_character("player");
 	entity->collision_radius = std::make_shared<Ccollision>(p_radius + p_thickness);
-	//entity->life = std::make_shared<Clife>(1000, m_current_frame);
 	player = entity;
 }
 
@@ -500,49 +512,57 @@ void Game::collision()
 			p->transform->pos.y = p->collision_radius->radius;
 		}
 	}
-	if (!player->input->special_weapon)
+	
+	for (auto& p : m_entities.get_entities("player"))
 	{
-		for (auto& p : m_entities.get_entities("player"))
+		for (auto& e : m_entities.get_entities("enemies"))
 		{
-			for (auto& e : m_entities.get_entities("enemies"))
+			if (p->is_active() && e->is_active())
 			{
-				if (p->is_active() && e->is_active())
+				float dist = p->transform->pos.dist(e->transform->pos);
+				if (dist < p->collision_radius->radius + e->collision_radius->radius)
 				{
-					float dist = p->transform->pos.dist(e->transform->pos);
-					if (dist < p->collision_radius->radius + e->collision_radius->radius)
+					if (!player->input->special_weapon)
 					{
 						p_e_collision_count++;
-						p->transform->pos = { w_width / 2,w_height / 2 };
-						e->destroy();
 						player_dead_sound->sound.play();
+						p->transform->pos = { w_width / 2,w_height / 2 };
+						
 					}
+					score += 5;
+					e->destroy();
 				}
 			}
-			for (auto& be : m_entities.get_entities("big_enemies"))
-			{
-				if (be->is_active() && p->is_active())
-				{
-					float dist = p->transform->pos.dist(be->transform->pos);
-					if (dist < p->collision_radius->radius + be->collision_radius->radius)
-					{
-						be->life->health--;
-						p_e_collision_count++;
-						if (be->life->health < 1)
-						{
-							score += 10;
-
-							be->destroy();
-							big_e_dead_sound->sound.play();
-						}
-
-						p->transform->pos = { w_width / 2,w_height / 2 };
-						player_dead_sound->sound.play();
-					}
-
-				}
-			}
-
 		}
+		for (auto& be : m_entities.get_entities("big_enemies"))
+		{
+			if (be->is_active() && p->is_active())
+			{
+				float dist = p->transform->pos.dist(be->transform->pos);
+				if (dist < p->collision_radius->radius + be->collision_radius->radius)
+				{
+					
+					if (!player->input->special_weapon)
+					{
+						p_e_collision_count++;
+						player_dead_sound->sound.play();
+						p->transform->pos = { w_width / 2,w_height / 2 };
+						be->life->health--;
+					}
+					
+					if (be->life->health < 1)
+					{
+						score += 10;
+						be->destroy();
+						big_e_dead_sound->sound.play();
+					}
+					
+					
+				}
+
+			}
+		}
+
 	}
 	
 
@@ -573,7 +593,7 @@ void Game::collision()
 					if (be->life->health<1)
 					{
 						score+=10;
-						bullet_no += get_random(5, 10);
+						bullet_no += get_random(2,6);
 						be->destroy();
 						big_e_dead_sound->sound.play();
 					}

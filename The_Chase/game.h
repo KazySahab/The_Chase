@@ -25,7 +25,7 @@ private:
 	std::shared_ptr<Entity> player;
 	
 	int m_current_frame = 0;
-	int bullet_no = 30;
+	int bullet_no = 40;
 	int score = 0;
 	int high_score = 0;
 	int p_e_collision_count = 0;
