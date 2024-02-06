@@ -52,7 +52,7 @@ void Game::run(sf::RenderWindow &window)
 				}
 				if (bullet_time.getElapsedTime().asSeconds() > 30)
 				{
-					bullet_no += 20;
+					bullet_no += 25;
 					remaining_p_special_power+=0.5;
 					std::cout << remaining_p_special_power << std::endl;
 					bullet_time.restart();
