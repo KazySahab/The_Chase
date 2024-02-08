@@ -12,7 +12,7 @@ Game::Game()
 	}
 	background.setSize(sf::Vector2f(w_width, w_height));
 	background.setTexture(&background_image);
-	difficulty_level_text->write.setString("Level : Beginner \n Next level at : 80 " );
+	difficulty_level_text->write.setString("Level : Beginner \nNext level at : 80 " );
 	sp_activated_text->write.setCharacterSize(30);
 	game_over_text->write.setString("GAME OVER!");
 	game_over_text->write.setCharacterSize(60);
@@ -667,7 +667,7 @@ void Game::change_level_bg_image()
 			 {
 				 std::cout << "background Load failed";
 			 }
-			 difficulty_level_text->write.setString("Level : Amateur \n Next level at : 180");
+			 difficulty_level_text->write.setString("Level : Amateur \nNext level at : 180");
 			 show_bg_image_counter++;
 			 e_spawn_interval = 3.2;
 		 }
@@ -683,7 +683,7 @@ void Game::change_level_bg_image()
 			 {
 				 std::cout << "background Load failed";
 			 }
-			 difficulty_level_text->write.setString("Level : Regular \n Next level at : 320");
+			 difficulty_level_text->write.setString("Level : Regular \nNext level at : 320");
 			 show_bg_image_counter++;
 			 e_spawn_interval = 3.0;
 
@@ -698,7 +698,7 @@ void Game::change_level_bg_image()
 			 {
 				 std::cout << "background Load failed";
 			 }
-			 difficulty_level_text->write.setString("Level : Professional \n Next level at : 500");
+			 difficulty_level_text->write.setString("Level : Professional \nNext level at : 500");
 			 show_bg_image_counter++;
 			 e_spawn_interval = 2.8;
 
