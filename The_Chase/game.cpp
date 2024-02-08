@@ -12,9 +12,10 @@ Game::Game()
 	}
 	background.setSize(sf::Vector2f(w_width, w_height));
 	background.setTexture(&background_image);
-	difficulty_level_text->write.setString("Level : Beginner");
+	difficulty_level_text->write.setString("Level : Beginner \n Next level at : 80 " );
+	sp_activated_text->write.setCharacterSize(30);
 	game_over_text->write.setString("GAME OVER!");
-	game_over_text->write.setCharacterSize(35);
+	game_over_text->write.setCharacterSize(50);
 	load_high_score();
 }
 
@@ -38,6 +39,8 @@ void Game::run(sf::RenderWindow &window)
 			rem_life_text->write.setString(" Life :" + std::to_string(3 - p_e_collision_count));
 			bullet_reload_time_text->write.setString("Reload Time (30s) : " + std::to_string((int)bullet_time.getElapsedTime().asSeconds()) + "\n Special Power : " + std::to_string((int)remaining_p_special_power));
 			bullet_num_text->write.setString("Remaining Bullets : " + std::to_string(bullet_no));
+			sp_activated_text->write.setString(std::to_string(5-(int)p_special_power_time.getElapsedTime().asSeconds()));
+			
 
 			if (!is_game_paused)
 			{
@@ -52,9 +55,8 @@ void Game::run(sf::RenderWindow &window)
 				}
 				if (bullet_time.getElapsedTime().asSeconds() > 30)
 				{
-					bullet_no += 25;
+					bullet_no += 30;
 					remaining_p_special_power+=0.5;
-					std::cout << remaining_p_special_power << std::endl;
 					bullet_time.restart();
 				}
 				if (background_sound_1->is_paused && background_sound_2->is_paused)
@@ -170,7 +172,7 @@ void Game::handle_input(sf::RenderWindow& window)
 			}
 			if (event.mouseButton.button == sf::Mouse::Right)
 			{
-				if (remaining_p_special_power > 0)
+				if (remaining_p_special_power > 0.5)
 				{
 				
 					player->shape->circle.setFillColor(sf::Color::Red);
@@ -262,7 +264,7 @@ void Game::handle_input(sf::RenderWindow& window)
 				}
 				else if (sf::Joystick::isButtonPressed(0, 4))
 				{
-					if (remaining_p_special_power > 0)
+					if (remaining_p_special_power > 0.5)
 					{
 
 						player->shape->circle.setFillColor(sf::Color::Red);
@@ -364,7 +366,10 @@ void Game::render(sf::RenderWindow& window)
 	if (p_e_collision_count > 2)
 	{
 		window.draw(game_over_text->write);
-		
+	}
+	if (player->input->special_weapon)
+	{
+		window.draw(sp_activated_text->write);
 	}
 	window.draw(score_text->write);
 	window.draw(rem_life_text->write);
@@ -384,10 +389,11 @@ void Game::spawn_enemy()
 	float angle = 200;
 	Vec2 e_velocity = { 0,0 };
 	Vec2 e_pos = { get_random(50, w_width - 50), get_random(50, w_height - 50) };
-	if (score >=0 && score < 100)  e_velocity = { get_random(150,200),get_random(150,200) };
-	else if(score >=100&&score<200)  e_velocity = { get_random(180,220),get_random(180,220) };
-	else if (score >= 200 && score < 350)  e_velocity = { get_random(200,250),get_random(200,250) };
-	else if (score >= 350)  e_velocity = { get_random(250,300),get_random(250,300) };
+	if (score >=0 && score < 80)  e_velocity = { get_random(140,160),get_random(140,160) };
+	else if(score >=80&&score<180)  e_velocity = { get_random(160,190),get_random(160,190) };
+	else if (score >= 180 && score < 320)  e_velocity = { get_random(190,230),get_random(190,230) };
+	else if (score >= 320 && score < 500)  e_velocity = { get_random(230,280),get_random(230,280) };
+	else if (score >= 500)  e_velocity = { get_random(280,330),get_random(280,330)};
 	auto enemy = m_entities.add_entity("enemies");
 	
 	enemy->transform = std::make_shared<Ctransform>(e_pos, e_velocity, angle);
@@ -399,7 +405,7 @@ void Game::spawn_enemy()
 	//Big_Enemy
 	if (big_e_spawn_interval % 5==0)
 	{
-		float be_radius = 25+(big_e_spawn_interval/5);
+		float be_radius = 23+(big_e_spawn_interval/5);
 		float be_thickness = 5;
 		float be_angle = 100;
 		Vec2 be_pos = { 0,0 };
@@ -417,7 +423,7 @@ void Game::spawn_enemy()
 		big_enemy->shape->load_character(get_enemy_image());
 		big_enemy->collision_radius = std::make_shared<Ccollision>(be_radius+be_thickness);
 		big_enemy->life = std::make_shared<Clife>();
-		big_enemy->life->set_health(3+(big_e_spawn_interval/5));
+		big_enemy->life->set_health(1+(big_e_spawn_interval/5));
 		big_e_spawn_sound->set_choices(get_big_e_spawn_sound());
 		big_e_spawn_sound->sound.play();
 	}
@@ -593,7 +599,7 @@ void Game::collision()
 					if (be->life->health<1)
 					{
 						score+=10;
-						bullet_no += get_random(2,6);
+						bullet_no += get_random(2,8);
 						be->destroy();
 						big_e_dead_sound->sound.play();
 					}
@@ -651,10 +657,7 @@ void Game::save_high_score()
 
 void Game::change_level_bg_image()
 {
-	std::string run_time_bg;
-	
-	
-	 if (score >= 100 && score < 200) 
+	 if (score >= 80 && score < 180) 
 	{
 		 if (show_bg_image_counter == 1)
 		 {
@@ -663,42 +666,58 @@ void Game::change_level_bg_image()
 			 {
 				 std::cout << "background Load failed";
 			 }
-			 difficulty_level_text->write.setString("Level : Regular ");
+			 difficulty_level_text->write.setString("Level : Amateur \n Next level at : 180");
 			 show_bg_image_counter++;
+			 e_spawn_interval = 3.3;
 		 }
 		 
 		
 	}
-	else if (score >= 200 && score < 350) 
+	else if (score >= 180 && score < 320) 
 	{
 		 if (show_bg_image_counter == 2)
 		 {
-			 run_time_bg = "background_image2";
+			
 			 if (!background_image.loadFromFile("images/background_image2.jpg"))
 			 {
 				 std::cout << "background Load failed";
 			 }
-			 difficulty_level_text->write.setString("Level : Professional ");
+			 difficulty_level_text->write.setString("Level : Regular \n Next level at : 320");
 			 show_bg_image_counter++;
+			 e_spawn_interval = 3.1;
 
 		 }
 		
 	}
-	else if (score  >= 350)  
+	else if (score  >= 320 && score < 500)  
 	{
 		 if (show_bg_image_counter == 3)
 		 {
-			 run_time_bg = "background_image3";
 			 if (!background_image.loadFromFile("images/background_image3.jpg"))
 			 {
 				 std::cout << "background Load failed";
 			 }
-			 difficulty_level_text->write.setString("Level : Legend ");
+			 difficulty_level_text->write.setString("Level : Professional \n Next level at : 500");
 			 show_bg_image_counter++;
+			 e_spawn_interval = 2.9;
 
 		 }
 		
 	}
+	else if (score >= 500)
+	 {
+		 if (show_bg_image_counter == 4)
+		 {
+			 if (!background_image.loadFromFile("images/background_image4.jpg"))
+			 {
+				 std::cout << "background Load failed";
+			 }
+			 difficulty_level_text->write.setString("Level : Legend ");
+			 e_spawn_interval = 2.7;
+			 show_bg_image_counter++;
+		 }
+
+	 }
 	
 }
 void Game:: load_special_power()

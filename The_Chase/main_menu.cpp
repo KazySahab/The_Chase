@@ -253,10 +253,10 @@ void Main_menu::load_scene()
 		menu_background.setSize(sf::Vector2f(w_width, w_height));
 		menu_background.setTexture(&menu_bg_image);
 		window.setTitle("Instructions");
-		instruction_keyboard->write.setString("----KEYBOARD---- \n\n W - Up \n A - Left \n S - Down \n D - Right \n P - Play/Pause \n Esc - Back/Exit \n Left Click - Fire/Shoot");
+		instruction_keyboard->write.setString("\t----KEYBOARD---- \n\n W - Up \n A - Left \n S - Down \n D - Right \n P - Pause/Play \n Esc - Back/Exit \n Left Click - Fire/Shoot \n Right Click - Special Power");
 		instruction_keyboard->write.setLetterSpacing(2);
 		instruction_keyboard->write.setCharacterSize(30);
-		instruction_joystick->write.setString("\t----JOYSTICK---- \n\n Left Analog - Move Player \n Right Buttons (X,Y,A,B) - Fire/Shoot \n Start/RT - Pause Game \n Back/LT - Back/Exit ");
+		instruction_joystick->write.setString("\t ----JOYSTICK---- \n\n Left Analog - Move Player \n Right Buttons (X,Y,A,B) - Fire/Shoot \n Start/RB - Pause/Play \n Back/LB - Back/Exit \n LB - Special Power");
 		instruction_joystick->write.setLetterSpacing(2);
 		instruction_joystick->write.setCharacterSize(30);
 		while (window.isOpen())
@@ -326,7 +326,7 @@ void Main_menu::load_scene()
 				break;
 
 			}
-			about_us->write.setString("\t\t\t\t\tABOUT US \n\n Hello There! and welcome to the game.... \n This is a indie game developed by a student studying in 2nd Semester. \n Any kind of feedback is acceptable. \n\n Developer - MAUSHAM NEUPANE");
+			about_us->write.setString("\t\t\t\t\tABOUT US \n\n Hello There! and welcome to the game.... \n This is a game developed by a students of 2nd semester by using c++. \n Feel free to play the game. \n Any kind of response and feedback is acceptable. \n\n Developer - MAUSHAM NEUPANE \n Logic Manager - MOHAMMAD AARMAN \n Graphic Designer - ISHAN KANAUJIYA ");
 			window.clear(sf::Color::Black);
 			window.draw(menu_background);
 			about_us->write.setCharacterSize(35);
