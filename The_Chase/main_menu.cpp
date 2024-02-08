@@ -1,11 +1,10 @@
 #include "main_menu.h"
 Main_menu::Main_menu()
-	:
-	
-	window(sf::VideoMode(w_width, w_height), "Main Menu")
-	
-	
 {
+	if (!icon.loadFromFile("images/icon.png"))
+	{
+		std::cout << "no icon" << std::endl;
+	}
 	if (!font.loadFromFile("font/h_ghost.ttf"))
 	{
 		std::cout << "Failed to load Font" << std::endl;
@@ -14,7 +13,8 @@ Main_menu::Main_menu()
 	{
 		std::cout << "background Load failed";
 	}
-
+	
+	
 	menu_background.setSize(sf::Vector2f(w_width, w_height));
 	menu_background.setTexture(&menu_bg_image);
 
@@ -31,6 +31,9 @@ Main_menu::Main_menu()
 	main_menu_selection[2].setString("HIGH SCORE");
 	main_menu_selection[3].setString("ABOUT US");
 	main_menu_selection[4].setString("EXIT");
+
+	window.create(sf::VideoMode(w_width, w_height), "Main Menu");
+	window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 }
 
 void Main_menu::draw_menu()
@@ -43,6 +46,7 @@ void Main_menu::draw_menu()
 
 void Main_menu::run()
 {
+
 	main_menu_selection[0].setFillColor(sf::Color::Red);
 	scary_welcome->sound.play();
 	menu_bg_sound->sound.play();

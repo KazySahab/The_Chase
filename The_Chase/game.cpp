@@ -15,7 +15,7 @@ Game::Game()
 	difficulty_level_text->write.setString("Level : Beginner \n Next level at : 80 " );
 	sp_activated_text->write.setCharacterSize(30);
 	game_over_text->write.setString("GAME OVER!");
-	game_over_text->write.setCharacterSize(50);
+	game_over_text->write.setCharacterSize(60);
 	load_high_score();
 }
 
@@ -55,7 +55,7 @@ void Game::run(sf::RenderWindow &window)
 				}
 				if (bullet_time.getElapsedTime().asSeconds() > 30)
 				{
-					bullet_no += 30;
+					bullet_no += 25;
 					remaining_p_special_power+=0.5;
 					bullet_time.restart();
 				}
@@ -86,6 +86,7 @@ void Game::run(sf::RenderWindow &window)
 				background_sound_1->sound.stop();
 				background_sound_2->sound.stop();
 				if(p_e_collision_count>2) sf::sleep(sf::seconds(3));
+				window.setTitle("Main Menu");
 				break;
 			}
 
@@ -389,11 +390,11 @@ void Game::spawn_enemy()
 	float angle = 200;
 	Vec2 e_velocity = { 0,0 };
 	Vec2 e_pos = { get_random(50, w_width - 50), get_random(50, w_height - 50) };
-	if (score >=0 && score < 80)  e_velocity = { get_random(140,160),get_random(140,160) };
-	else if(score >=80&&score<180)  e_velocity = { get_random(160,190),get_random(160,190) };
-	else if (score >= 180 && score < 320)  e_velocity = { get_random(190,230),get_random(190,230) };
-	else if (score >= 320 && score < 500)  e_velocity = { get_random(230,280),get_random(230,280) };
-	else if (score >= 500)  e_velocity = { get_random(280,330),get_random(280,330)};
+	if (score >=0 && score < 80)  e_velocity = { get_random(150,170),get_random(150,170) };
+	else if(score >=80&&score<180)  e_velocity = { get_random(170,200),get_random(170,200) };
+	else if (score >= 180 && score < 320)  e_velocity = { get_random(200,235),get_random(200,235) };
+	else if (score >= 320 && score < 500)  e_velocity = { get_random(235,285),get_random(235,285) };
+	else if (score >= 500)  e_velocity = { get_random(285,330),get_random(285,330)};
 	auto enemy = m_entities.add_entity("enemies");
 	
 	enemy->transform = std::make_shared<Ctransform>(e_pos, e_velocity, angle);
@@ -423,7 +424,7 @@ void Game::spawn_enemy()
 		big_enemy->shape->load_character(get_enemy_image());
 		big_enemy->collision_radius = std::make_shared<Ccollision>(be_radius+be_thickness);
 		big_enemy->life = std::make_shared<Clife>();
-		big_enemy->life->set_health(1+(big_e_spawn_interval/5));
+		big_enemy->life->set_health(2+(big_e_spawn_interval/5));
 		big_e_spawn_sound->set_choices(get_big_e_spawn_sound());
 		big_e_spawn_sound->sound.play();
 	}
@@ -668,7 +669,7 @@ void Game::change_level_bg_image()
 			 }
 			 difficulty_level_text->write.setString("Level : Amateur \n Next level at : 180");
 			 show_bg_image_counter++;
-			 e_spawn_interval = 3.3;
+			 e_spawn_interval = 3.2;
 		 }
 		 
 		
@@ -684,7 +685,7 @@ void Game::change_level_bg_image()
 			 }
 			 difficulty_level_text->write.setString("Level : Regular \n Next level at : 320");
 			 show_bg_image_counter++;
-			 e_spawn_interval = 3.1;
+			 e_spawn_interval = 3.0;
 
 		 }
 		
@@ -699,7 +700,7 @@ void Game::change_level_bg_image()
 			 }
 			 difficulty_level_text->write.setString("Level : Professional \n Next level at : 500");
 			 show_bg_image_counter++;
-			 e_spawn_interval = 2.9;
+			 e_spawn_interval = 2.8;
 
 		 }
 		
@@ -713,7 +714,7 @@ void Game::change_level_bg_image()
 				 std::cout << "background Load failed";
 			 }
 			 difficulty_level_text->write.setString("Level : Legend ");
-			 e_spawn_interval = 2.7;
+			 e_spawn_interval = 2.5;
 			 show_bg_image_counter++;
 		 }
 
