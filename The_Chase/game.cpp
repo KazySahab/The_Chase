@@ -609,9 +609,13 @@ void Game::collision()
 					if (be->life->health<1)
 					{
 						score+=10;
-						if (score >= 400)
+						if (score >= 350 && score < 750 )
 						{
 							bullet_no += get_random(10, 20);
+						}
+						else if (score >= 750)
+						{
+							bullet_no += get_random(20, 30);
 						}
 						else
 						{
