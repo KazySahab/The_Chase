@@ -165,11 +165,16 @@ void Game::handle_input(sf::RenderWindow& window)
 			if (event.mouseButton.button == sf::Mouse::Left)
 			{
 				spawn_bullet(player, Vec2(event.mouseButton.x, event.mouseButton.y));
-			
-				if (bullet_no > 0)
+				
+				if (!player->input->special_weapon)
 				{
-					bullet_no -= 1;
+					if (bullet_no > 0)
+					{
+						bullet_no -= 1;
+					}
+
 				}
+				
 			}
 			if (event.mouseButton.button == sf::Mouse::Right)
 			{
@@ -278,9 +283,13 @@ void Game::handle_input(sf::RenderWindow& window)
 				}
 
 
-				if (bullet_no > 0)
+				if (!player->input->special_weapon)
 				{
-					bullet_no -= 1;
+					if (bullet_no > 0)
+					{
+						bullet_no -= 1;
+					}
+
 				}
 
 			}
