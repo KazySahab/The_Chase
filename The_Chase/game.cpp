@@ -609,7 +609,15 @@ void Game::collision()
 					if (be->life->health<1)
 					{
 						score+=10;
-						bullet_no += get_random(2,8);
+						if (score >= 400)
+						{
+							bullet_no += get_random(10, 20);
+						}
+						else
+						{
+							bullet_no += get_random(2, 10);
+						}
+						
 						be->destroy();
 						big_e_dead_sound->sound.play();
 					}
