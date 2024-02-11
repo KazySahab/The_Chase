@@ -1,4 +1,4 @@
-Just Extract And Run The chase.exe 
+Just Download The Chase.rar file, extract and run the game.
 
 ****************NOTE*****************
 
